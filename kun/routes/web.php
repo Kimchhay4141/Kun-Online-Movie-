@@ -11,6 +11,7 @@ use App\Http\Controllers\WatchController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\WatchlistController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
     // Favorites
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
     Route::delete('/favorites/{movieId}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
     
     // Watchlist (My List)
@@ -141,39 +143,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     })->name('dashboard');
     
     // Movies Management
-    Route::get('/movies', function() {
-        return view('admin.movies.index');
-    })->name('movies.index');
-    
-    Route::get('/movies/create', function() {
-        return view('admin.movies.create');
-    })->name('movies.create');
-    
-    Route::post('/movies', function() {
-        // Store movie logic
-    })->name('movies.store');
-    
-    Route::get('/movies/{id}', function($id) {
-        return view('admin.movies.show', compact('id'));
-    })->name('movies.show');
-    
-    Route::get('/movies/{id}/edit', function($id) {
-        return view('admin.movies.edit', compact('id'));
-    })->name('movies.edit');
-    
-    Route::put('/movies/{id}', function($id) {
-        // Update movie logic
-    })->name('movies.update');
-    
-    Route::delete('/movies/{id}', function($id) {
-        // Delete movie logic
-        return response()->json(['success' => true]);
-    })->name('movies.destroy');
-    
-    Route::patch('/movies/{id}/status', function($id) {
-        // Update status logic
-        return response()->json(['success' => true]);
-    })->name('movies.status');
+    Route::get('/movies', [AdminMovieController::class, 'index'])->name('movies.index');
+    Route::get('/movies/{movie}/edit', [AdminMovieController::class, 'edit'])->name('movies.edit');
+    Route::put('/movies/{movie}', [AdminMovieController::class, 'update'])->name('movies.update');
     
     // Genres Management
     Route::get('/genres', function() {

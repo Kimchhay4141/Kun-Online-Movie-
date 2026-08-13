@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterController extends Controller
@@ -31,36 +30,27 @@ class RegisterController extends Controller
             'password' => ['required', 'confirmed', Password::min(8)
                 ->letters()
                 ->mixedCase()
-                ->numbers()
-                ->symbols()],
+                ->numbers()],
             'terms' => ['accepted'],
         ]);
 
-        // Create user
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'password' => $validated['password'],
+            'subscription_status' => 'free',
+            'subscription_plan' => 'free',
         ]);
 
-        // Assign default role (user)
         $userRole = Role::where('name', 'user')->first();
         if ($userRole) {
             $user->roles()->attach($userRole->id);
         }
 
-        // Log the user in
         Auth::login($user);
+        $request->session()->regenerate();
 
-        // Send welcome email (optional)
-        // Mail::to($user->email)->send(new WelcomeEmail($user));
-
-        // Log registration activity
-        activity()
-            ->causedBy($user)
-            ->log('User registered');
-
-        return redirect('/')->with('success', 'Welcome to Kun, ' . $user->name . '!');
+        return redirect()->route('home')->with('success', 'Welcome to Kun, ' . $user->name . '!');
     }
 
     /**

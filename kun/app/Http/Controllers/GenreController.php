@@ -29,7 +29,7 @@ class GenreController extends Controller
         $movies = $genre->movies()
             ->with('genres')
             ->where('status', 'published')
-            ->orderBy('release_date', 'desc')
+            ->orderBy('release_year', 'desc')
             ->paginate(20);
 
         return view('genres.show', compact('genre', 'movies'));

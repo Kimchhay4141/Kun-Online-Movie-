@@ -23,8 +23,8 @@ class MovieController extends Controller
         }
 
         // Filter by year
-        if ($request->has('year')) {
-            $query->whereYear('release_date', $request->year);
+        if ($request->filled('year')) {
+            $query->where('release_year', $request->year);
         }
 
         // Filter by rating
@@ -45,13 +45,16 @@ class MovieController extends Controller
                 $query->orderBy('title', 'asc');
                 break;
             default:
-                $query->orderBy('release_date', 'desc');
+                $query->orderBy('release_year', 'desc')->orderBy('created_at', 'desc');
         }
 
         $movies = $query->paginate(20);
         $genres = Genre::all();
+        $favoriteMovieIds = auth()->check()
+            ? auth()->user()->favorites()->pluck('movie_id')
+            : collect();
 
-        return view('movies.index', compact('movies', 'genres'));
+        return view('movies.index', compact('movies', 'genres', 'favoriteMovieIds'));
     }
 
     /**
@@ -60,7 +63,7 @@ class MovieController extends Controller
     public function show($id)
     {
         $movie = Movie::with(['genres', 'videos', 'views'])
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'coming_soon'])
             ->findOrFail($id);
 
         // Increment view count
@@ -129,10 +132,15 @@ class MovieController extends Controller
         $movies = $genre->movies()
             ->with('genres')
             ->where('status', 'published')
-            ->orderBy('release_date', 'desc')
+            ->orderBy('release_year', 'desc')
             ->paginate(20);
 
-        return view('movies.index', compact('movies', 'genre'));
+        $genres = Genre::all();
+        $favoriteMovieIds = auth()->check()
+            ? auth()->user()->favorites()->pluck('movie_id')
+            : collect();
+
+        return view('movies.index', compact('movies', 'genres', 'genre', 'favoriteMovieIds'));
     }
 
     /**
@@ -156,7 +164,7 @@ class MovieController extends Controller
     {
         $movies = Movie::with('genres')
             ->where('status', 'published')
-            ->orderBy('release_date', 'desc')
+            ->orderBy('release_year', 'desc')
             ->take(10)
             ->get();
 

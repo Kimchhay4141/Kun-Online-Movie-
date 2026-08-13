@@ -11,11 +11,11 @@
     <div class="auth-box">
         <div class="auth-header">
             <div class="auth-logo">
-                <i class="fas fa-film"></i>
+                <i class="fas fa-play-circle"></i>
                 <span>KUN</span>
             </div>
             <h1>Welcome Back</h1>
-            <p>Sign in to continue watching</p>
+            <p>Sign in to continue streaming on Kun</p>
         </div>
 
         @if(session('success'))
@@ -34,6 +34,9 @@
 
         <form action="{{ route('login') }}" method="POST" class="auth-form">
             @csrf
+            @if(request('redirect'))
+            <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+            @endif
 
             <div class="form-group">
                 <label for="email">

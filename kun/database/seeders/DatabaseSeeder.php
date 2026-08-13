@@ -25,11 +25,16 @@ class DatabaseSeeder extends Seeder
         $this->command->newLine();
         $this->command->info('🎬 Seeding Content...');
         
-        // Uncomment when you create these seeders
-        // $this->call([
-        //     GenreSeeder::class,
-        //     MovieSeeder::class,
-        // ]);
+        $this->call([
+            GenreSeeder::class,
+            MovieSeeder::class,
+            ComingSoonSeeder::class,
+            MovieVideoSeeder::class,
+            TestUserSeeder::class,
+            FavoriteSeeder::class,
+            WatchlistSeeder::class,
+            MovieViewSeeder::class,
+        ]);
 
         $this->command->newLine();
         $this->command->info('✅ Database seeding completed successfully!');

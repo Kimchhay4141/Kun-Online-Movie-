@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('watchlists', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('movie_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+            
+            // Unique constraint - user can add a movie to watchlist only once
+            $table->unique(['user_id', 'movie_id']);
+            
+            // Indexes
+            $table->index('user_id');
+            $table->index('movie_id');
         });
     }
 

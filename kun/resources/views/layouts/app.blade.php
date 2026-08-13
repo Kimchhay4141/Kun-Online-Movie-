@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Kun - Your ultimate online movie streaming platform">
-    <title>@yield('title', 'Kun - Online Movie Platform')</title>
+    <meta name="description" content="Kun - Stream movies online. Watch trending films, save favorites, and discover new releases.">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Kun - Stream Movies Online')</title>
     
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
@@ -18,6 +19,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Base Styles -->
+    <link rel="stylesheet" href="{{ asset('css/streaming.css') }}">
     <style>
         * {
             margin: 0;
@@ -28,9 +30,9 @@
         :root {
             --primary-color: #e50914;
             --secondary-color: #831010;
-            --dark-bg: #141414;
-            --darker-bg: #0a0a0a;
-            --light-bg: #1f1f1f;
+            --dark-bg: #000000;
+            --darker-bg: #000000;
+            --light-bg: #141414;
             --text-primary: #ffffff;
             --text-secondary: #b3b3b3;
             --text-muted: #808080;

@@ -1,56 +1,89 @@
 @extends('layouts.app')
 
-@section('title', 'Kun - Watch Movies Online')
+@section('title', 'Kun Online Movie - Stream Unlimited Movies & TV Shows')
 
 @section('content')
-<div class="home-page">
-    {{-- Hero Section --}}
+<div class="streaming-home">
+    {{-- Hero Section - Featured Content --}}
     @if($featured)
-    <section class="hero-section" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('{{ $featured->banner ?? $featured->thumbnail }}');">
-        <div class="hero-content">
-            <h1 class="hero-title">{{ $featured->title }}</h1>
-            <div class="hero-meta">
-                <span class="rating">⭐ {{ number_format($featured->rating, 1) }}</span>
-                <span>{{ $featured->release_year }}</span>
-                <span>{{ $featured->duration }} min</span>
-                @if($featured->content_rating)
-                <span class="badge">{{ $featured->content_rating }}</span>
-                @endif
-            </div>
-            <p class="hero-description">{{ Str::limit($featured->description, 200) }}</p>
-            <div class="hero-actions">
-                @auth
-                    <a href="{{ route('movie.watch', $featured->id) }}" class="btn btn-primary btn-lg">
-                        ▶ Watch Now
-                    </a>
-                @else
-                    <a href="{{ route('register') }}" class="btn btn-primary btn-lg">
-                        Sign Up to Watch
-                    </a>
-                @endauth
-                <a href="{{ route('movie.show', $featured->id) }}" class="btn btn-secondary btn-lg">
-                    More Info
-                </a>
+    <section class="hero-banner" style="background-image: url('{{ $featured->banner ?? $featured->thumbnail ?? 'https://via.placeholder.com/1920x1080' }}');">
+        <div class="hero-overlay"></div>
+        <div class="hero-content-wrapper">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="badge-kun">🎬 KUN ONLINE MOVIE</span>
+                    </div>
+                    <h1 class="hero-title">{{ $featured->title }}</h1>
+                    <div class="hero-meta">
+                        <span class="meta-item rating">
+                            <i class="fas fa-star"></i> {{ number_format($featured->rating, 1) }}
+                        </span>
+                        <span class="meta-item">{{ $featured->release_year }}</span>
+                        <span class="meta-item">{{ $featured->duration ?? 120 }} min</span>
+                        @if($featured->content_rating)
+                        <span class="meta-item content-rating">{{ $featured->content_rating }}</span>
+                        @endif
+                    </div>
+                    <p class="hero-description">{{ Str::limit($featured->description ?? 'Experience unlimited streaming of movies online.', 250) }}</p>
+                    
+                    <div class="hero-buttons">
+                        @auth
+                            <a href="{{ route('movie.watch', $featured->id) }}" class="btn-hero btn-play">
+                                <i class="fas fa-play"></i> Play Now
+                            </a>
+                            <a href="{{ route('movie.show', $featured->id) }}" class="btn-hero btn-info">
+                                <i class="fas fa-info-circle"></i> More Info
+                            </a>
+                        @else
+                            <a href="{{ route('register') }}" class="btn-hero btn-play">
+                                <i class="fas fa-play"></i> Start Streaming
+                            </a>
+                            <a href="{{ route('login') }}" class="btn-hero btn-info">
+                                <i class="fas fa-sign-in-alt"></i> Sign In
+                            </a>
+                        @endauth
+                    </div>
+
+                    @if($featured->genres && $featured->genres->count() > 0)
+                    <div class="hero-genres">
+                        @foreach($featured->genres->take(3) as $genre)
+                        <span class="genre-tag">{{ $genre->name }}</span>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
             </div>
         </div>
     </section>
     @endif
 
-    {{-- Continue Watching (Authenticated Users Only) --}}
+    {{-- Continue Watching (Auth Only) --}}
     @auth
     @if($continueWatching->count() > 0)
-    <section class="movie-section">
+    <section class="content-row">
         <div class="container">
-            <h2 class="section-title">Continue Watching</h2>
-            <div class="movie-grid">
+            <div class="row-header">
+                <h2 class="row-title">
+                    <i class="fas fa-history"></i> Continue Watching
+                </h2>
+            </div>
+            <div class="movie-slider">
                 @foreach($continueWatching as $movie)
-                <div class="movie-card">
-                    <a href="{{ route('movie.watch', $movie->id) }}">
-                        <img src="{{ $movie->thumbnail }}" alt="{{ $movie->title }}">
-                        <div class="movie-info">
-                            <h3>{{ $movie->title }}</h3>
-                            <p>{{ $movie->release_year }}</p>
+                <div class="movie-item">
+                    <a href="{{ route('movie.watch', $movie->id) }}" class="movie-link">
+                        <div class="movie-poster">
+                            <img src="{{ $movie->thumbnail ?? 'https://via.placeholder.com/300x450' }}" alt="{{ $movie->title }}" loading="lazy">
+                            <div class="movie-overlay">
+                                <div class="play-icon">
+                                    <i class="fas fa-play-circle"></i>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%"></div>
+                            </div>
                         </div>
+                        <h3 class="movie-title">{{ $movie->title }}</h3>
                     </a>
                 </div>
                 @endforeach
@@ -62,28 +95,29 @@
 
     {{-- Trending Now --}}
     @if($trending->count() > 0)
-    <section class="movie-section">
+    <section class="content-row">
         <div class="container">
-            <h2 class="section-title">Trending Now</h2>
-            <div class="movie-grid">
-                @foreach($trending as $movie)
-                <div class="movie-card">
-                    <a href="{{ route('movie.show', $movie->id) }}">
-                        <img src="{{ $movie->thumbnail }}" alt="{{ $movie->title }}">
-                        <div class="movie-overlay">
-                            <div class="movie-info">
-                                <h3>{{ $movie->title }}</h3>
-                                <div class="movie-meta">
-                                    <span>⭐ {{ number_format($movie->rating, 1) }}</span>
-                                    <span>{{ $movie->release_year }}</span>
+            <div class="row-header">
+                <h2 class="row-title">
+                    <i class="fas fa-fire"></i> Trending Now
+                </h2>
+                <a href="{{ route('movies.index') }}" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="movie-slider">
+                @foreach($trending as $index => $movie)
+                <div class="movie-item">
+                    <a href="{{ route('movie.show', $movie->id) }}" class="movie-link">
+                        <div class="movie-poster">
+                            <div class="trending-number">{{ $index + 1 }}</div>
+                            <img src="{{ $movie->thumbnail ?? 'https://via.placeholder.com/300x450' }}" alt="{{ $movie->title }}" loading="lazy">
+                            <div class="movie-overlay">
+                                <div class="overlay-content">
+                                    <h4>{{ $movie->title }}</h4>
+                                    <div class="movie-info">
+                                        <span><i class="fas fa-star"></i> {{ number_format($movie->rating, 1) }}</span>
+                                        <span>{{ $movie->release_year }}</span>
+                                    </div>
                                 </div>
-                                @if($movie->genres->count() > 0)
-                                <div class="movie-genres">
-                                    @foreach($movie->genres->take(2) as $genre)
-                                    <span class="genre-badge">{{ $genre->name }}</span>
-                                    @endforeach
-                                </div>
-                                @endif
                             </div>
                         </div>
                     </a>
@@ -96,28 +130,36 @@
 
     {{-- New Releases --}}
     @if($newReleases->count() > 0)
-    <section class="movie-section">
+    <section class="content-row">
         <div class="container">
-            <h2 class="section-title">New Releases</h2>
-            <div class="movie-grid">
+            <div class="row-header">
+                <h2 class="row-title">
+                    <i class="fas fa-sparkles"></i> New Releases
+                </h2>
+                <a href="{{ route('movies.index') }}" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="movie-slider">
                 @foreach($newReleases as $movie)
-                <div class="movie-card">
-                    <a href="{{ route('movie.show', $movie->id) }}">
-                        <img src="{{ $movie->thumbnail }}" alt="{{ $movie->title }}">
-                        <div class="movie-overlay">
-                            <div class="movie-info">
-                                <h3>{{ $movie->title }}</h3>
-                                <div class="movie-meta">
-                                    <span>⭐ {{ number_format($movie->rating, 1) }}</span>
-                                    <span>{{ $movie->release_year }}</span>
+                <div class="movie-item">
+                    <a href="{{ route('movie.show', $movie->id) }}" class="movie-link">
+                        <div class="movie-poster">
+                            <div class="new-badge">NEW</div>
+                            <img src="{{ $movie->thumbnail ?? 'https://via.placeholder.com/300x450' }}" alt="{{ $movie->title }}" loading="lazy">
+                            <div class="movie-overlay">
+                                <div class="overlay-content">
+                                    <h4>{{ $movie->title }}</h4>
+                                    <div class="movie-info">
+                                        <span><i class="fas fa-star"></i> {{ number_format($movie->rating, 1) }}</span>
+                                        <span>{{ $movie->release_year }}</span>
+                                    </div>
+                                    @if($movie->genres && $movie->genres->count() > 0)
+                                    <div class="movie-genres">
+                                        @foreach($movie->genres->take(2) as $genre)
+                                        <span class="genre-pill">{{ $genre->name }}</span>
+                                        @endforeach
+                                    </div>
+                                    @endif
                                 </div>
-                                @if($movie->genres->count() > 0)
-                                <div class="movie-genres">
-                                    @foreach($movie->genres->take(2) as $genre)
-                                    <span class="genre-badge">{{ $genre->name }}</span>
-                                    @endforeach
-                                </div>
-                                @endif
                             </div>
                         </div>
                     </a>
@@ -130,28 +172,35 @@
 
     {{-- Popular Movies --}}
     @if($popular->count() > 0)
-    <section class="movie-section">
+    <section class="content-row">
         <div class="container">
-            <h2 class="section-title">Popular Movies</h2>
-            <div class="movie-grid">
+            <div class="row-header">
+                <h2 class="row-title">
+                    <i class="fas fa-crown"></i> Popular on Kun
+                </h2>
+                <a href="{{ route('movies.index') }}" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="movie-slider">
                 @foreach($popular as $movie)
-                <div class="movie-card">
-                    <a href="{{ route('movie.show', $movie->id) }}">
-                        <img src="{{ $movie->thumbnail }}" alt="{{ $movie->title }}">
-                        <div class="movie-overlay">
-                            <div class="movie-info">
-                                <h3>{{ $movie->title }}</h3>
-                                <div class="movie-meta">
-                                    <span>⭐ {{ number_format($movie->rating, 1) }}</span>
-                                    <span>{{ $movie->release_year }}</span>
+                <div class="movie-item">
+                    <a href="{{ route('movie.show', $movie->id) }}" class="movie-link">
+                        <div class="movie-poster">
+                            <img src="{{ $movie->thumbnail ?? 'https://via.placeholder.com/300x450' }}" alt="{{ $movie->title }}" loading="lazy">
+                            <div class="movie-overlay">
+                                <div class="overlay-content">
+                                    <h4>{{ $movie->title }}</h4>
+                                    <div class="movie-info">
+                                        <span><i class="fas fa-star"></i> {{ number_format($movie->rating, 1) }}</span>
+                                        <span>{{ $movie->duration ?? 120 }} min</span>
+                                    </div>
+                                    @if($movie->genres && $movie->genres->count() > 0)
+                                    <div class="movie-genres">
+                                        @foreach($movie->genres->take(2) as $genre)
+                                        <span class="genre-pill">{{ $genre->name }}</span>
+                                        @endforeach
+                                    </div>
+                                    @endif
                                 </div>
-                                @if($movie->genres->count() > 0)
-                                <div class="movie-genres">
-                                    @foreach($movie->genres->take(2) as $genre)
-                                    <span class="genre-badge">{{ $genre->name }}</span>
-                                    @endforeach
-                                </div>
-                                @endif
                             </div>
                         </div>
                     </a>
@@ -166,15 +215,23 @@
     @if($genres->count() > 0)
     <section class="genres-section">
         <div class="container">
-            <h2 class="section-title">Browse by Genre</h2>
+            <div class="row-header">
+                <h2 class="row-title">
+                    <i class="fas fa-th-large"></i> Browse by Genre
+                </h2>
+            </div>
             <div class="genres-grid">
                 @foreach($genres as $genre)
                 <a href="{{ route('movies.genre', $genre->slug) }}" class="genre-card">
-                    @if($genre->icon)
-                    <span class="genre-icon">{{ $genre->icon }}</span>
-                    @endif
-                    <h3>{{ $genre->name }}</h3>
-                    <p>{{ $genre->movies_count }} movies</p>
+                    <div class="genre-icon">
+                        @if($genre->icon)
+                            {{ $genre->icon }}
+                        @else
+                            <i class="fas fa-film"></i>
+                        @endif
+                    </div>
+                    <h3 class="genre-name">{{ $genre->name }}</h3>
+                    <p class="genre-count">{{ $genre->movies_count }} titles</p>
                 </a>
                 @endforeach
             </div>
@@ -182,190 +239,339 @@
     </section>
     @endif
 
-    {{-- Call to Action for Guests --}}
+    {{-- CTA Section for Guests --}}
     @guest
     <section class="cta-section">
-        <div class="container text-center">
-            <h2>Ready to start watching?</h2>
-            <p>Join thousands of movie lovers on Kun. Sign up now and start watching!</p>
-            <div class="cta-actions">
-                <a href="{{ route('register') }}" class="btn btn-primary btn-lg">Get Started Free</a>
-                <a href="{{ route('movies.index') }}" class="btn btn-outline btn-lg">Browse Movies</a>
+        <div class="container">
+            <div class="cta-content">
+                <div class="cta-text">
+                    <h2>Unlimited movies, TV shows, and more</h2>
+                    <p>Stream anywhere. Cancel anytime.</p>
+                    <p class="cta-subtitle">Ready to watch? Create your free account to start streaming movies online now.</p>
+                </div>
+                <div class="cta-buttons">
+                    <a href="{{ route('register') }}" class="btn-cta btn-cta-primary">
+                        Get Started Free <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="{{ route('movies.index') }}" class="btn-cta btn-cta-secondary">
+                        Browse Catalog
+                    </a>
+                </div>
             </div>
         </div>
     </section>
     @endguest
+
+    {{-- Empty State --}}
+    @if($trending->isEmpty() && $newReleases->isEmpty() && $popular->isEmpty())
+    <section class="empty-state">
+        <div class="container">
+            <div class="empty-content">
+                <i class="fas fa-film empty-icon"></i>
+                <h2>No movies available yet</h2>
+                <p>Our streaming catalog is being prepared. Check back soon!</p>
+                @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" class="btn-hero btn-play">Go to Admin Panel</a>
+                @endif
+            </div>
+        </div>
+    </section>
+    @endif
 </div>
 
+@push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-.home-page {
+/* ==================== Base Styles ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.streaming-home {
     min-height: 100vh;
-    background: #0a0a0a;
+    background: #141414;
     color: #fff;
-}
-
-.hero-section {
-    height: 80vh;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    padding: 0 5%;
-    margin-bottom: 2rem;
-}
-
-.hero-content {
-    max-width: 600px;
-}
-
-.hero-title {
-    font-size: 3.5rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-.hero-meta {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.hero-meta .rating {
-    color: #ffc107;
-    font-weight: bold;
-}
-
-.hero-meta .badge {
-    background: rgba(255,255,255,0.2);
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.hero-description {
-    font-size: 1.2rem;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    opacity: 0.9;
-}
-
-.hero-actions {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.btn {
-    padding: 0.75rem 2rem;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s;
-    border: none;
-    cursor: pointer;
-    display: inline-block;
-}
-
-.btn-lg {
-    padding: 1rem 2.5rem;
-    font-size: 1.1rem;
-}
-
-.btn-primary {
-    background: #e50914;
-    color: #fff;
-}
-
-.btn-primary:hover {
-    background: #f40612;
-}
-
-.btn-secondary {
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-}
-
-.btn-secondary:hover {
-    background: rgba(255,255,255,0.3);
-}
-
-.btn-outline {
-    background: transparent;
-    color: #fff;
-    border: 2px solid #fff;
-}
-
-.btn-outline:hover {
-    background: #fff;
-    color: #000;
-}
-
-.movie-section, .genres-section, .cta-section {
-    padding: 3rem 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0 2.5rem;
 }
 
-.section-title {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-}
-
-.movie-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
-}
-
-.movie-card {
+/* ==================== Hero Banner ==================== */
+.hero-banner {
     position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.3s;
+    height: 85vh;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
-.movie-card:hover {
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to right,
+        rgba(0,0,0,0.95) 0%,
+        rgba(0,0,0,0.7) 40%,
+        rgba(0,0,0,0.4) 60%,
+        transparent 100%
+    ),
+    linear-gradient(
+        to top,
+        rgba(0,0,0,0.95) 0%,
+        transparent 40%
+    );
+}
+
+.hero-content-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+}
+
+.hero-content {
+    max-width: 600px;
+    padding: 3rem 0;
+}
+
+.hero-badge {
+    margin-bottom: 1rem;
+}
+
+.badge-kun {
+    display: inline-block;
+    background: linear-gradient(135deg, #e50914 0%, #ff2d37 100%);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.25rem;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+}
+
+.hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.meta-item.rating {
+    color: #ffd700;
+    font-weight: 600;
+}
+
+.content-rating {
+    background: rgba(255,255,255,0.15);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.3);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.hero-description {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-play {
+    background: #fff;
+    color: #000;
+}
+
+.btn-play:hover {
+    background: rgba(255,255,255,0.85);
     transform: scale(1.05);
 }
 
-.movie-card img {
+.btn-info {
+    background: rgba(109,109,110,0.7);
+    color: #fff;
+    backdrop-filter: blur(10px);
+}
+
+.btn-info:hover {
+    background: rgba(109,109,110,0.5);
+}
+
+.hero-genres {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.genre-tag {
+    background: rgba(255,255,255,0.1);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ==================== Content Rows ==================== */
+.content-row {
+    padding: 2.5rem 0;
+}
+
+.row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.row-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.row-title i {
+    color: #e50914;
+}
+
+.view-all {
+    color: #e5e5e5;
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s;
+}
+
+.view-all:hover {
+    color: #fff;
+}
+
+/* ==================== Movie Slider ==================== */
+.movie-slider {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.movie-item {
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.movie-item:hover {
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+.movie-link {
+    display: block;
+    text-decoration: none;
+    color: #fff;
+}
+
+.movie-poster {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 2/3;
+    background: #2a2a2a;
+}
+
+.movie-poster img {
     width: 100%;
-    height: 300px;
+    height: 100%;
     object-fit: cover;
     display: block;
 }
 
 .movie-overlay {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.9));
-    padding: 1rem;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95), transparent 50%);
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: flex-end;
+    padding: 1rem;
 }
 
-.movie-card:hover .movie-overlay {
+.movie-item:hover .movie-overlay {
     opacity: 1;
 }
 
-.movie-info h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+.play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    color: rgba(255,255,255,0.9);
 }
 
-.movie-meta {
+.overlay-content h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.movie-info {
     display: flex;
     gap: 0.75rem;
-    font-size: 0.9rem;
-    opacity: 0.8;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.8);
     margin-bottom: 0.5rem;
 }
 
@@ -375,94 +581,228 @@
     flex-wrap: wrap;
 }
 
-.genre-badge {
+.genre-pill {
+    background: rgba(255,255,255,0.15);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+.movie-title {
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #e5e5e5;
+}
+
+.progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
     background: rgba(255,255,255,0.2);
-    padding: 0.25rem 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #e50914;
+}
+
+.trending-number {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: #e50914;
+    color: #fff;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 1.1rem;
+    z-index: 2;
+}
+
+.new-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: #46d369;
+    color: #000;
+    padding: 0.3rem 0.75rem;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    z-index: 2;
+}
+
+/* ==================== Genres Section ==================== */
+.genres-section {
+    padding: 3rem 0;
 }
 
 .genres-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.25rem;
 }
 
 .genre-card {
-    background: rgba(255,255,255,0.1);
-    padding: 2rem 1rem;
-    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 2rem 1.5rem;
     text-align: center;
     text-decoration: none;
     color: #fff;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
 }
 
 .genre-card:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    border-color: #e50914;
     transform: translateY(-5px);
 }
 
 .genre-icon {
-    font-size: 2rem;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
     display: block;
+}
+
+.genre-name {
+    font-size: 1.25rem;
+    font-weight: 600;
     margin-bottom: 0.5rem;
 }
 
-.genre-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 0.25rem;
-}
-
-.genre-card p {
+.genre-count {
     font-size: 0.9rem;
-    opacity: 0.7;
+    color: rgba(255,255,255,0.6);
 }
 
+/* ==================== CTA Section ==================== */
 .cta-section {
-    background: linear-gradient(135deg, #e50914 0%, #831010 100%);
-    padding: 4rem 0;
+    background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+    padding: 5rem 0;
+    margin: 3rem 0;
+}
+
+.cta-content {
     text-align: center;
 }
 
-.cta-section h2 {
-    font-size: 2.5rem;
+.cta-text h2 {
+    font-size: 3rem;
+    font-weight: 800;
     margin-bottom: 1rem;
 }
 
-.cta-section p {
-    font-size: 1.2rem;
-    opacity: 0.9;
-    margin-bottom: 2rem;
+.cta-text p {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
 }
 
-.cta-actions {
+.cta-subtitle {
+    font-size: 1.1rem !important;
+    opacity: 0.9;
+    margin-bottom: 2.5rem !important;
+}
+
+.cta-buttons {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 1.25rem;
     flex-wrap: wrap;
 }
 
-.text-center {
+.btn-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-cta-primary {
+    background: #fff;
+    color: #e50914;
+}
+
+.btn-cta-primary:hover {
+    background: rgba(255,255,255,0.9);
+    transform: scale(1.05);
+}
+
+.btn-cta-secondary {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+}
+
+.btn-cta-secondary:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* ==================== Empty State ==================== */
+.empty-state {
+    padding: 6rem 0;
+}
+
+.empty-content {
     text-align: center;
 }
 
+.empty-icon {
+    font-size: 5rem;
+    color: rgba(255,255,255,0.2);
+    margin-bottom: 2rem;
+}
+
+.empty-content h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.empty-content p {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 2rem;
+}
+
+/* ==================== Responsive ==================== */
+@media (max-width: 1024px) {
+    .hero-title { font-size: 3rem; }
+    .movie-slider { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}
+
 @media (max-width: 768px) {
-    .hero-title {
-        font-size: 2rem;
-    }
-    
-    .hero-description {
-        font-size: 1rem;
-    }
-    
-    .movie-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-    
-    .movie-card img {
-        height: 220px;
-    }
+    .container { padding: 0 1.5rem; }
+    .hero-title { font-size: 2.25rem; }
+    .hero-description { font-size: 1rem; }
+    .btn-hero { padding: 0.75rem 1.5rem; font-size: 1rem; }
+    .movie-slider { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; }
+    .row-title { font-size: 1.4rem; }
+    .cta-text h2 { font-size: 2rem; }
+    .cta-text p { font-size: 1.2rem; }
+    .genres-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+@media (max-width: 480px) {
+    .hero-banner { height: 70vh; }
+    .hero-title { font-size: 1.75rem; }
+    .hero-meta { gap: 0.75rem; font-size: 0.85rem; }
+    .hero-buttons { flex-direction: column; }
+    .btn-hero { width: 100%; justify-content: center; }
+    .movie-slider { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
+@endpush
 @endsection

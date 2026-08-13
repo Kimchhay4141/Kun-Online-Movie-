@@ -11,11 +11,11 @@
     <div class="auth-box">
         <div class="auth-header">
             <div class="auth-logo">
-                <i class="fas fa-film"></i>
+                <i class="fas fa-play-circle"></i>
                 <span>KUN</span>
             </div>
             <h1>Create Account</h1>
-            <p>Join us for unlimited entertainment</p>
+            <p>Join Kun and stream movies online for free</p>
         </div>
 
         @if(session('error'))

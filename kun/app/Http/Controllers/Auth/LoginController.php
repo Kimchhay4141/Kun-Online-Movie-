@@ -32,12 +32,9 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // Log login activity
-            activity()
-                ->causedBy(Auth::user())
-                ->log('User logged in');
+            $redirectTo = $request->input('redirect', '/');
 
-            return redirect()->intended('/')->with('success', 'Welcome back, ' . Auth::user()->name . '!');
+            return redirect()->to($redirectTo)->with('success', 'Welcome back, ' . Auth::user()->name . '!');
         }
 
         throw ValidationException::withMessages([

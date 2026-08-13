@@ -1,0 +1,132 @@
+/* Kun - Global Online Streaming Theme */
+
+body {
+    background-color: #000 !important;
+}
+
+main {
+    background: #000;
+}
+
+/* Shared section headers (homepage + browse pages) */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.section-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.section-title-wrap h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.section-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #e50914;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #fff;
+}
+
+.view-all-link {
+    color: #e50914;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.view-all-link:hover { opacity: 0.85; }
+
+/* Streaming buttons */
+.btn-stream-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #e50914;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-stream-primary:hover { background: #f40612; color: #fff; }
+
+.btn-stream-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid #555;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-stream-outline:hover {
+    border-color: #fff;
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+}
+
+/* Page headers */
+.stream-page-header {
+    padding: 2rem 0 1.5rem;
+    background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, #000 100%);
+}
+
+.stream-page-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+}
+
+.stream-page-header p {
+    color: #999;
+    font-size: 0.95rem;
+}
+
+/* Auth modal (shared) */
+.auth-modal[hidden] { display: none; }
+.auth-modal {
+    position: fixed; inset: 0; z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+}
+.auth-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.85); }
+.auth-modal-content {
+    position: relative; background: #141414; padding: 2rem;
+    border-radius: 14px; max-width: 420px; width: 90%;
+    text-align: center; border: 1px solid #2a2a2a; color: #fff;
+}
+.auth-modal-content p { color: #999; margin-bottom: 1.5rem; }
+.auth-modal-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.auth-modal-close {
+    position: absolute; top: 0.75rem; right: 1rem;
+    background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;
+}
