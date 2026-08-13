@@ -1,0 +1,560 @@
+/* ============================================
+   User Pages CSS
+   ============================================ */
+
+/* User Library Pages */
+.user-library-page {
+    padding: 40px 0 80px;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.page-header h1 {
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.page-header h1 i {
+    color: var(--primary-color);
+}
+
+.page-header p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.empty-state i {
+    font-size: 80px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h2 {
+    font-size: 28px;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+/* History List */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 25px;
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    border-color: var(--primary-color);
+}
+
+.history-poster {
+    position: relative;
+    width: 200px;
+    aspect-ratio: 2/3;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.history-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.history-item:hover .history-poster img {
+    transform: scale(1.05);
+}
+
+.progress-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+}
+
+.progress-overlay .progress-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-overlay .progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+}
+
+.history-info {
+    flex: 1;
+}
+
+.history-info h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.history-info h3 a {
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.history-info h3 a:hover {
+    color: var(--primary-color);
+}
+
+.history-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.history-meta span {
+    color: var(--text-secondary);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.history-meta i {
+    color: var(--primary-color);
+    font-size: 13px;
+}
+
+.history-genres {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.history-genres .genre-tag {
+    font-size: 12px;
+    padding: 4px 10px;
+}
+
+.history-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* Profile Page */
+.profile-page {
+    padding: 40px 0 80px;
+}
+
+.profile-header {
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 50px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.profile-avatar {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--primary-color);
+    box-shadow: 0 10px 30px rgba(229, 9, 20, 0.3);
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.change-avatar-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-avatar:hover .change-avatar-btn {
+    opacity: 1;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h1 {
+    font-size: 36px;
+    font-weight: 900;
+    margin-bottom: 5px;
+}
+
+.profile-email {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.subscription-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.subscription-badge.cancelled {
+    background: var(--text-muted);
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Profile Tabs */
+.profile-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 15px 25px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-btn i {
+    font-size: 16px;
+}
+
+/* Tab Content */
+.tab-content {
+    min-height: 400px;
+}
+
+.tab-pane {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Profile Form */
+.profile-form {
+    max-width: 600px;
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.profile-form .form-group {
+    margin-bottom: 20px;
+}
+
+.profile-form label {
+    display: block;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.profile-form input,
+.profile-form select {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.profile-form input:focus,
+.profile-form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Security Options */
+.security-options {
+    max-width: 600px;
+    margin-top: 40px;
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.security-options h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.security-options p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+/* Current Plan */
+.current-plan,
+.no-subscription {
+    max-width: 600px;
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+}
+
+.current-plan h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.current-plan p {
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.subscription-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.no-subscription {
+    text-align: center;
+}
+
+.no-subscription i {
+    font-size: 60px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.no-subscription h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.no-subscription p {
+    color: var(--text-secondary);
+    margin-bottom: 25px;
+}
+
+/* Pagination */
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .history-item {
+        grid-template-columns: 150px 1fr;
+    }
+
+    .history-poster {
+        width: 150px;
+    }
+
+    .history-actions {
+        grid-column: 2;
+        margin-top: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 30px;
+    }
+
+    .profile-stats {
+        justify-content: center;
+    }
+
+    .profile-tabs {
+        gap: 5px;
+    }
+
+    .tab-btn {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .history-item {
+        grid-template-columns: 120px 1fr;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .history-poster {
+        width: 120px;
+    }
+
+    .history-info h3 {
+        font-size: 18px;
+    }
+
+    .subscription-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profile-info h1 {
+        font-size: 28px;
+    }
+
+    .profile-stats {
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .history-item {
+        grid-template-columns: 1fr;
+    }
+
+    .history-poster {
+        width: 100%;
+        max-width: 250px;
+        margin: 0 auto;
+    }
+
+    .history-actions .btn {
+        width: 100%;
+    }
+}

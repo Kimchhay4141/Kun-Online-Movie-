@@ -17,8 +17,19 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('avatar')->nullable();
+            $table->enum('subscription_status', ['free', 'active', 'cancelled', 'expired'])->default('free');
+            $table->enum('subscription_plan', ['free', 'standard', 'premium'])->default('free');
+            $table->timestamp('subscription_start')->nullable();
+            $table->timestamp('subscription_end')->nullable();
+            $table->boolean('is_banned')->default(false);
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
+            
+            // Indexes
+            $table->index('subscription_status');
+            $table->index('is_banned');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
