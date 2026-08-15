@@ -3,7 +3,7 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <div class="footer-logo">
-                    <span class="logo-icon">🎬</span>
+                    <span class="logo-icon"><i class="fas fa-clapperboard"></i></span>
                     <span class="logo-text">KUN</span>
                 </div>
                 <p class="footer-description">
@@ -57,7 +57,7 @@
 
         <div class="footer-bottom">
             <p>&copy; {{ date('Y') }} Kun Online Movie. All rights reserved.</p>
-            <p class="footer-credits">Built with ❤️ for movie lovers</p>
+            <p class="footer-credits">Built for movie lovers</p>
         </div>
     </div>
 </footer>

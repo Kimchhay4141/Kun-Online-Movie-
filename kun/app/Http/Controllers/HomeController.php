@@ -15,6 +15,8 @@ class HomeController extends Controller
     public function index()
     {
         try {
+            $displayableStatuses = ['published', 'coming_soon'];
+
             // Get featured movie
             $featured = Movie::with('genres')
                 ->where('status', 'published')
@@ -53,6 +55,15 @@ class HomeController extends Controller
                 ->take(10)
                 ->get();
 
+            // Get every movie that should be visible on the public homepage
+            $allMovies = Movie::with('genres')
+                ->whereIn('status', $displayableStatuses)
+                ->orderByRaw("CASE WHEN status = 'published' THEN 0 ELSE 1 END")
+                ->orderByDesc('is_featured')
+                ->orderByDesc('published_at')
+                ->orderByDesc('created_at')
+                ->get();
+
             // Get genres
             $genres = Genre::where('is_active', true)
                 ->withCount('movies')
@@ -86,6 +97,7 @@ class HomeController extends Controller
                 'trending',
                 'newReleases',
                 'popular',
+                'allMovies',
                 'genres',
                 'continueWatching',
                 'favoriteMovieIds'
@@ -99,9 +111,11 @@ class HomeController extends Controller
                 'trending' => collect(),
                 'newReleases' => collect(),
                 'popular' => collect(),
+                'allMovies' => collect(),
                 'genres' => collect(),
                 'continueWatching' => collect(),
-                'favoriteMovieIds' => collect()
+                'favoriteMovieIds' => collect(),
+                'loadError' => 'The catalog could not be loaded right now.'
             ]);
         }
     }

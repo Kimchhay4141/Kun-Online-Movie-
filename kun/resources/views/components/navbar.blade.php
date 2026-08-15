@@ -2,24 +2,37 @@
     <div class="navbar-container">
         <div class="navbar-brand">
             <a href="{{ route('home') }}" class="logo">
-                <span class="logo-icon">🎬</span>
-                <span class="logo-text">KUN</span>
+                <span class="logo-mark"><span></span></span>
+                <span class="logo-copy">
+                    <span class="logo-text">KUN</span>
+                    <span class="logo-subtitle">ONLINE MOVIE</span>
+                </span>
             </a>
         </div>
 
         <div class="navbar-menu" id="navbarMenu">
             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
-                <i class="fas fa-home"></i> Home
+                Home
             </a>
             <a href="{{ route('movies.index') }}" class="{{ request()->routeIs('movies.*') ? 'active' : '' }}">
-                <i class="fas fa-film"></i> Movies
+                Movies
+            </a>
+            <a href="{{ route('movies.index') }}">
+                TV Shows
             </a>
             <a href="{{ route('genres.index') }}" class="{{ request()->routeIs('genres.*') ? 'active' : '' }}">
-                <i class="fas fa-th-large"></i> Genres
+                Genres
+            </a>
+            <a href="{{ route('movies.index', ['sort' => 'popular']) }}">
+                New & Popular
             </a>
             @auth
             <a href="{{ route('favorites.index') }}" class="{{ request()->routeIs('favorites.*') ? 'active' : '' }}">
-                <i class="fas fa-heart"></i> My List
+                My List
+            </a>
+            @else
+            <a href="{{ route('login') }}">
+                My List
             </a>
             @endauth
         </div>
@@ -27,7 +40,7 @@
         <div class="navbar-actions">
             <div class="search-box">
                 <form action="{{ route('movies.search') }}" method="GET">
-                    <input type="text" name="q" placeholder="Search movies..." class="search-input">
+                    <input type="text" name="q" placeholder="Search movies, genres..." class="search-input">
                     <button type="submit" class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>
@@ -35,11 +48,16 @@
             </div>
 
             @auth
+                <button class="notification-btn" type="button" aria-label="Notifications">
+                    <i class="far fa-bell"></i>
+                    <span>3</span>
+                </button>
                 <div class="user-menu">
                     <button class="user-btn" onclick="toggleUserMenu()">
                         <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}" 
                              alt="{{ auth()->user()->name }}" 
                              class="user-avatar">
+                        <span class="user-display-name">{{ auth()->user()->name }}</span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="user-dropdown" id="userDropdown">
@@ -369,6 +387,219 @@
     .navbar-menu.mobile-active a {
         padding: 1rem 0;
         border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+}
+
+/* Reference header styling */
+.navbar {
+    background: rgba(4, 11, 18, 0.72);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(20px);
+}
+
+.navbar.scrolled {
+    background: rgba(4, 8, 13, 0.94);
+}
+
+.navbar-container {
+    max-width: 1500px;
+    min-height: 72px;
+    padding: 0 2.65rem;
+    gap: 2.35rem;
+}
+
+.navbar-brand .logo {
+    gap: 0.72rem;
+}
+
+.logo-mark {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ef1f2d, #b5111e);
+    box-shadow: 0 12px 28px rgba(239, 31, 45, 0.26);
+}
+
+.logo-mark span {
+    width: 0;
+    height: 0;
+    margin-left: 3px;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 15px solid #fff;
+}
+
+.logo-copy {
+    display: grid;
+    line-height: 1;
+}
+
+.logo-text {
+    color: #ff2634;
+    font-size: 2rem;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0;
+}
+
+.logo-subtitle {
+    margin-top: 0.14rem;
+    color: rgba(255,255,255,0.78);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+}
+
+.navbar-menu {
+    gap: 1.8rem;
+    margin-left: 0.45rem;
+}
+
+.navbar-menu a {
+    gap: 0;
+    color: rgba(255,255,255,0.88);
+    font-size: 0.94rem;
+    font-weight: 650;
+    padding: 1.65rem 0;
+    white-space: nowrap;
+}
+
+.navbar-menu a.active {
+    color: #ff2634;
+}
+
+.navbar-menu a.active::after {
+    height: 2px;
+    bottom: 0.85rem;
+    background: #ff2634;
+}
+
+.navbar-actions {
+    gap: 1.15rem;
+}
+
+.search-box form {
+    width: min(330px, 24vw);
+    min-width: 250px;
+    height: 42px;
+    padding: 0 0.85rem 0 1rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    background: rgba(8, 15, 24, 0.76);
+}
+
+.search-input {
+    width: 100%;
+    color: rgba(255,255,255,0.86);
+}
+
+.search-btn {
+    color: rgba(255,255,255,0.78);
+}
+
+.notification-btn {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.notification-btn span {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #ef1f2d;
+    color: #fff;
+    font-size: 0.64rem;
+    font-weight: 800;
+}
+
+.user-btn {
+    gap: 0.65rem;
+}
+
+.user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+}
+
+.user-display-name {
+    max-width: 120px;
+    overflow: hidden;
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-login,
+.btn-register {
+    border-radius: 8px;
+}
+
+@media (max-width: 1100px) {
+    .navbar-container {
+        padding: 0 1.4rem;
+        gap: 1rem;
+    }
+
+    .navbar-menu {
+        gap: 1rem;
+    }
+
+    .search-box form {
+        min-width: 210px;
+    }
+}
+
+@media (max-width: 860px) {
+    .search-box {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-container {
+        min-height: 70px;
+        padding: 0 1rem;
+    }
+
+    .logo-text {
+        font-size: 1.65rem;
+    }
+
+    .logo-subtitle {
+        font-size: 0.58rem;
+    }
+
+    .navbar-menu.mobile-active {
+        padding: 0.8rem 1.2rem;
+        background: rgba(5, 9, 14, 0.98);
+    }
+
+    .navbar-menu.mobile-active a {
+        padding: 0.95rem 0;
+    }
+
+    .user-display-name,
+    .notification-btn {
+        display: none;
     }
 }
 </style>
