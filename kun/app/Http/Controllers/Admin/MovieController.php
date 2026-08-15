@@ -10,11 +10,46 @@ use Illuminate\Support\Str;
 
 class MovieController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $movies = Movie::with('genres')->orderBy('created_at', 'desc')->paginate(15);
+        $query = Movie::with('genres');
 
-        return view('admin.movies.index', compact('movies'));
+        // Search filter
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Genre filter
+        if ($request->filled('genre')) {
+            $query->whereHas('genres', function($q) use ($request) {
+                $q->where('genres.id', $request->genre);
+            });
+        }
+
+        $movies = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Stats
+        $totalMovies = Movie::count();
+        $publishedMovies = Movie::where('status', 'published')->count();
+        $draftMovies = Movie::where('status', 'draft')->count();
+        $comingSoonMovies = Movie::where('status', 'coming_soon')->count();
+
+        // Get genres for filter
+        $genres = Genre::where('is_active', true)->orderBy('name')->get();
+
+        return view('admin.movies.index', compact(
+            'movies',
+            'totalMovies',
+            'publishedMovies',
+            'draftMovies',
+            'comingSoonMovies',
+            'genres'
+        ));
     }
 
     public function edit(Movie $movie)

@@ -19,6 +19,7 @@ class LoginController extends Controller
 
     /**
      * Handle login request
+     * Implements KUN Login Flow: Admin -> Dashboard, Normal User -> Home
      */
     public function login(Request $request)
     {
@@ -32,9 +33,18 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            $redirectTo = $request->input('redirect', '/');
+            $user = Auth::user();
 
-            return redirect()->to($redirectTo)->with('success', 'Welcome back, ' . Auth::user()->name . '!');
+            // KUN Login Flow: Check user role and redirect accordingly
+            if ($user->isAdmin()) {
+                // Admin -> Redirect to Admin Dashboard
+                return redirect()->route('admin.dashboard')
+                    ->with('success', 'Welcome back, Admin ' . $user->name . '!');
+            }
+
+            // Normal User -> Redirect to Home
+            return redirect()->route('home')
+                ->with('success', 'Welcome back, ' . $user->name . '!');
         }
 
         throw ValidationException::withMessages([

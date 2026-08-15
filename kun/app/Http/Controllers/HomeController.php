@@ -14,18 +14,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $nowShowing = Movie::with('genres')
-            ->where('status', 'published')
-            ->orderBy('view_count', 'desc')
-            ->take(8)
-            ->get();
-
-        $comingSoon = Movie::with('genres')
-            ->where('status', 'coming_soon')
-            ->orderBy('release_date')
-            ->take(8)
-            ->get();
-
+        // Get featured movie
         $featured = Movie::with('genres')
             ->where('status', 'published')
             ->where('is_featured', true)
@@ -39,13 +28,40 @@ class HomeController extends Controller
                 ->first();
         }
 
+        // Get trending movies (high views in last 7 days)
+        $trending = Movie::with('genres')
+            ->where('status', 'published')
+            ->withCount(['movieViews as recent_views' => function($query) {
+                $query->where('created_at', '>=', now()->subDays(7));
+            }])
+            ->orderBy('recent_views', 'desc')
+            ->take(10)
+            ->get();
+
+        // Get new releases
+        $newReleases = Movie::with('genres')
+            ->where('status', 'published')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // Get popular movies
+        $popular = Movie::with('genres')
+            ->where('status', 'published')
+            ->orderBy('view_count', 'desc')
+            ->take(10)
+            ->get();
+
+        // Get genres
         $genres = Genre::where('is_active', true)
             ->withCount('movies')
             ->orderBy('sort_order')
             ->get();
 
+        // Get user-specific data if authenticated
         $continueWatching = collect();
         $favoriteMovieIds = collect();
+        
         if (auth()->check()) {
             $continueWatching = auth()->user()
                 ->movieViews()
@@ -65,9 +81,10 @@ class HomeController extends Controller
         }
 
         return view('home', compact(
-            'nowShowing',
-            'comingSoon',
             'featured',
+            'trending',
+            'newReleases',
+            'popular',
             'genres',
             'continueWatching',
             'favoriteMovieIds'

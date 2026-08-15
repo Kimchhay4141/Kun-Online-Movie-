@@ -25,11 +25,27 @@ use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 */
 
 // ==========================================
-// Public Routes
+// Public Routes (Visitors can access)
 // ==========================================
 
-// Homepage
+// Homepage - Public (Visitors can browse)
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Browse Movies - Public
+Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
+
+// Movie Detail - Public
+Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movie.show');
+
+// Search Movies - Public
+Route::get('/search', [MovieController::class, 'search'])->name('movies.search');
+
+// Browse by Genre - Public
+Route::get('/genre/{slug}', [MovieController::class, 'byGenre'])->name('movies.genre');
+
+// Genres Page - Public
+Route::get('/genres', [GenreController::class, 'index'])->name('genres.index');
+Route::get('/genres/{slug}', [GenreController::class, 'show'])->name('genres.show');
 
 // ==========================================
 // Authentication Routes
@@ -46,10 +62,6 @@ Route::post('/register', [RegisterController::class, 'register']);
 // Logout
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
-// Social Authentication
-Route::get('/auth/{provider}', [LoginController::class, 'redirectToProvider'])->name('social.login');
-Route::get('/auth/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
-
 // Password Reset
 Route::get('/password/reset', function() {
     return view('auth.passwords.email');
@@ -58,26 +70,6 @@ Route::get('/password/reset', function() {
 Route::post('/password/email', function() {
     // Password reset email logic
 })->name('password.email');
-
-// ==========================================
-// Movie Routes
-// ==========================================
-
-// Browse Movies
-Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
-
-// Movie Detail
-Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movie.show');
-
-// Search Movies
-Route::get('/search', [MovieController::class, 'search'])->name('movies.search');
-
-// Browse by Genre
-Route::get('/genre/{slug}', [MovieController::class, 'byGenre'])->name('movies.genre');
-
-// Genres Page
-Route::get('/genres', [GenreController::class, 'index'])->name('genres.index');
-Route::get('/genres/{slug}', [GenreController::class, 'show'])->name('genres.show');
 
 // ==========================================
 // Protected Routes (Require Authentication)
@@ -138,9 +130,7 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     
     // Dashboard
-    Route::get('/dashboard', function() {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     
     // Movies Management
     Route::get('/movies', [AdminMovieController::class, 'index'])->name('movies.index');
@@ -148,38 +138,15 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::put('/movies/{movie}', [AdminMovieController::class, 'update'])->name('movies.update');
     
     // Genres Management
-    Route::get('/genres', function() {
-        return view('admin.genres.index');
-    })->name('genres.index');
-    
-    Route::get('/genres/create', function() {
-        return view('admin.genres.create');
-    })->name('genres.create');
-    
-    Route::post('/genres', function() {
-        // Store genre logic
-    })->name('genres.store');
-    
-    Route::get('/genres/{id}/edit', function($id) {
-        return view('admin.genres.edit', compact('id'));
-    })->name('genres.edit');
-    
-    Route::put('/genres/{id}', function($id) {
-        // Update genre logic
-    })->name('genres.update');
-    
-    Route::delete('/genres/{id}', function($id) {
-        // Delete genre logic
-    })->name('genres.destroy');
+    Route::get('/genres', [App\Http\Controllers\Admin\GenreController::class, 'index'])->name('genres.index');
+    Route::post('/genres', [App\Http\Controllers\Admin\GenreController::class, 'store'])->name('genres.store');
+    Route::put('/genres/{id}', [App\Http\Controllers\Admin\GenreController::class, 'update'])->name('genres.update');
+    Route::delete('/genres/{id}', [App\Http\Controllers\Admin\GenreController::class, 'destroy'])->name('genres.destroy');
     
     // Users Management
-    Route::get('/users', function() {
-        return view('admin.users.index');
-    })->name('users.index');
-    
-    Route::get('/users/{id}', function($id) {
-        return view('admin.users.show', compact('id'));
-    })->name('users.show');
+    Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
+    Route::post('/users/{id}/suspend', [App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend');
     
     // Payments Management
     Route::get('/payments', function() {

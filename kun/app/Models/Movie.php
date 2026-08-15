@@ -61,6 +61,11 @@ class Movie extends Model
         return $this->hasMany(MovieView::class);
     }
 
+    public function movieViews(): HasMany
+    {
+        return $this->hasMany(MovieView::class);
+    }
+
     public function videos(): HasMany
     {
         return $this->hasMany(MovieVideo::class);
