@@ -14,16 +14,34 @@ class RoleController extends Controller
     /**
      * Display a listing of roles.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Role::class);
 
-        $roles = Role::withCount('permissions', 'users')
-            ->with('permissions')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Role::withCount('permissions', 'users')->with('permissions');
 
-        return view('admin.roles.index', compact('roles'));
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('slug', 'like', '%' . $request->search . '%')
+                    ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $roles = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+
+        $totalRoles = Role::count();
+        $assignedRoles = Role::has('users')->count();
+        $systemRoles = Role::whereIn('slug', ['admin', 'super-admin'])->count();
+        $newRolesToday = Role::whereDate('created_at', today())->count();
+
+        return view('admin.roles.index', compact(
+            'roles',
+            'totalRoles',
+            'assignedRoles',
+            'systemRoles',
+            'newRolesToday'
+        ));
     }
 
     /**

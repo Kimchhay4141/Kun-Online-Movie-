@@ -164,76 +164,6 @@
         </div>
     </div>
 
-    <!-- Analytics Section -->
-    <div class="analytics-row">
-        <!-- Platform Analytics Chart -->
-        <div class="analytics-card large-card">
-            <div class="card-header-modern">
-                <h3 class="card-title-modern">
-                    <i class="fas fa-chart-line"></i>
-                    Platform Analytics
-                </h3>
-                <select class="time-selector">
-                    <option>Last 30 Days</option>
-                    <option>Last 7 Days</option>
-                    <option>Last 90 Days</option>
-                    <option>Last Year</option>
-                </select>
-            </div>
-            <div class="card-body-modern">
-                <canvas id="platformChart" height="80"></canvas>
-                <div class="analytics-stats-row">
-                    <div class="analytics-stat-item">
-                        <span class="stat-label-small">Total Views</span>
-                        <h4 class="stat-value-small">48,290</h4>
-                        <span class="stat-change-small positive">+16.3%</span>
-                    </div>
-                    <div class="analytics-stat-item">
-                        <span class="stat-label-small">Total Watch Time</span>
-                        <h4 class="stat-value-small">2,142h</h4>
-                        <span class="stat-change-small positive">+18.7%</span>
-                    </div>
-                    <div class="analytics-stat-item">
-                        <span class="stat-label-small">Avg. Watch Time</span>
-                        <h4 class="stat-value-small">42m</h4>
-                        <span class="stat-change-small positive">+9.2%</span>
-                    </div>
-                    <div class="analytics-stat-item">
-                        <span class="stat-label-small">Bounce Rate</span>
-                        <h4 class="stat-value-small">24.6%</h4>
-                        <span class="stat-change-small negative">+3.1%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Users by Role Pie Chart -->
-        <div class="analytics-card">
-            <div class="card-header-modern">
-                <h3 class="card-title-modern">
-                    <i class="fas fa-users"></i>
-                    Users by Role
-                </h3>
-            </div>
-            <div class="card-body-modern">
-                <canvas id="usersRoleChart" height="180"></canvas>
-                <div class="role-legend">
-                    @php
-                        $roleStats = \App\Models\Role::withCount('users')->get();
-                        $totalUsers = \App\Models\User::count();
-                    @endphp
-                    @foreach($roleStats as $role)
-                    <div class="legend-item">
-                        <span class="legend-dot" style="background: {{ ['#8b5cf6', '#3b82f6', '#f59e0b', '#10b981'][$loop->index % 4] }}"></span>
-                        <span class="legend-label">{{ $role->name }}</span>
-                        <span class="legend-value">{{ $role->users_count }} ({{ $totalUsers > 0 ? number_format(($role->users_count / $totalUsers) * 100, 1) : 0 }}%)</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Bottom Row -->
     <div class="bottom-row">
         <!-- Recent Activity -->
@@ -556,21 +486,6 @@
     font-size: 0.75rem;
 }
 
-/* Analytics Row */
-.analytics-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.analytics-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    overflow: hidden;
-}
-
 .card-header-modern {
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
@@ -592,85 +507,8 @@
     color: var(--primary-color);
 }
 
-.time-selector {
-    background: var(--light-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.85rem;
-}
-
 .card-body-modern {
     padding: 1.5rem;
-}
-
-.analytics-stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
-
-.analytics-stat-item {
-    text-align: center;
-}
-
-.stat-label-small {
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.stat-value-small {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-}
-
-.stat-change-small {
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.stat-change-small.positive { color: #10b981; }
-.stat-change-small.negative { color: #ef4444; }
-
-/* Role Legend */
-.role-legend {
-    margin-top: 2rem;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.legend-item:last-child {
-    border-bottom: none;
-}
-
-.legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-}
-
-.legend-label {
-    flex: 1;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.legend-value {
-    color: var(--text-muted);
-    font-size: 0.85rem;
 }
 
 /* Bottom Row */
@@ -821,124 +659,11 @@
     color: white;
 }
 
-@media (max-width: 1200px) {
-    .analytics-row {
-        grid-template-columns: 1fr;
-    }
-}
-
 @media (max-width: 768px) {
     .bottom-row {
         grid-template-columns: 1fr;
     }
-    
-    .analytics-stats-row {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 </style>
 
-@endsection
-
-@section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Platform Analytics Chart
-const platformCtx = document.getElementById('platformChart');
-if (platformCtx) {
-    new Chart(platformCtx, {
-        type: 'line',
-        data: {
-            labels: ['May 15', 'May 20', 'May 25', 'May 30', 'Jun 4', 'Jun 9', 'Jun 15'],
-            datasets: [{
-                label: 'Users',
-                data: [400, 450, 480, 520, 580, 650, 700],
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4,
-                fill: true,
-                borderWidth: 2
-            }, {
-                label: 'Movie Views',
-                data: [300, 380, 420, 480, 550, 620, 680],
-                borderColor: '#8b5cf6',
-                backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                tension: 0.4,
-                fill: true,
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        color: '#b3b3b3',
-                        usePointStyle: true
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.05)'
-                    },
-                    ticks: {
-                        color: '#b3b3b3'
-                    }
-                },
-                x: {
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.05)'
-                    },
-                    ticks: {
-                        color: '#b3b3b3'
-                    }
-                }
-            }
-        }
-    });
-}
-
-// Users by Role Pie Chart
-const usersRoleCtx = document.getElementById('usersRoleChart');
-if (usersRoleCtx) {
-    new Chart(usersRoleCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Admin', 'Editor', 'Moderator', 'Subscriber'],
-            datasets: [{
-                data: [3, 8, 15, 1219],
-                backgroundColor: [
-                    '#8b5cf6',
-                    '#3b82f6',
-                    '#f59e0b',
-                    '#10b981'
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.label + ': ' + context.parsed + ' users';
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-</script>
 @endsection

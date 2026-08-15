@@ -34,13 +34,22 @@ class PermissionController extends Controller
             });
         }
 
-        $permissions = $query->orderBy('group')
-            ->orderBy('name')
-            ->paginate(20);
+        $permissions = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
         $modules = Permission::distinct()->pluck('group')->filter()->sort();
+        $totalPermissions = Permission::count();
+        $assignedPermissions = Permission::has('roles')->count();
+        $moduleCount = $modules->count();
+        $newPermissionsToday = Permission::whereDate('created_at', today())->count();
 
-        return view('admin.permissions.index', compact('permissions', 'modules'));
+        return view('admin.permissions.index', compact(
+            'permissions',
+            'modules',
+            'totalPermissions',
+            'assignedPermissions',
+            'moduleCount',
+            'newPermissionsToday'
+        ));
     }
 
     /**

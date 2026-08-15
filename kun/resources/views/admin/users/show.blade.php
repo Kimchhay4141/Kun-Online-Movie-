@@ -37,8 +37,10 @@
                 </div>
             </div>
             <div class="profile-actions">
-                <button class="btn-secondary"><i class="fas fa-edit"></i> Edit User</button>
+                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-secondary"><i class="fas fa-edit"></i> Edit User</a>
+                @unless($user->isAdmin() || $user->id === auth()->id())
                 <button class="btn-danger" onclick="suspendUser()"><i class="fas fa-ban"></i> Suspend</button>
+                @endunless
             </div>
         </div>
 

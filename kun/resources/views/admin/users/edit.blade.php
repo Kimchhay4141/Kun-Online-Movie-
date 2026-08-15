@@ -1,29 +1,30 @@
 @extends('layouts.admin')
 
-@section('title', 'Add User - Admin')
+@section('title', 'Edit User - Admin')
 
 @section('content')
 <div class="user-form-page">
     <a href="{{ route('admin.users.index') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Users</a>
-    <h1 class="page-title"><i class="fas fa-user-plus"></i> Add User</h1>
-    <p class="page-subtitle">Create an account and assign a role</p>
+    <h1 class="page-title"><i class="fas fa-user-edit"></i> Edit User</h1>
+    <p class="page-subtitle">Update {{ $user->name }}'s account details</p>
 
-    <form action="{{ route('admin.users.store') }}" method="POST" class="user-form">
+    <form action="{{ route('admin.users.update', $user->id) }}" method="POST" class="user-form">
         @csrf
+        @method('PUT')
         <div class="form-grid">
             <div class="field">
                 <label for="name">Name</label>
-                <input id="name" name="name" type="text" value="{{ old('name') }}" required>
+                <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required>
                 @error('name')<span class="error">{{ $message }}</span>@enderror
             </div>
             <div class="field">
                 <label for="email">Email</label>
-                <input id="email" name="email" type="email" value="{{ old('email') }}" required>
+                <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" required>
                 @error('email')<span class="error">{{ $message }}</span>@enderror
             </div>
             <div class="field">
                 <label for="phone">Phone</label>
-                <input id="phone" name="phone" type="text" value="{{ old('phone') }}">
+                <input id="phone" name="phone" type="text" value="{{ old('phone', $user->phone) }}">
                 @error('phone')<span class="error">{{ $message }}</span>@enderror
             </div>
             <div class="field">
@@ -31,31 +32,31 @@
                 <select id="roles" name="roles[]">
                     <option value="">Select role</option>
                     @foreach($roles as $role)
-                    <option value="{{ $role->id }}" {{ in_array($role->id, old('roles', [])) ? 'selected' : '' }}>{{ $role->name }}</option>
+                    <option value="{{ $role->id }}" {{ in_array($role->id, old('roles', $userRoles)) ? 'selected' : '' }}>{{ $role->name }}</option>
                     @endforeach
                 </select>
                 @error('roles')<span class="error">{{ $message }}</span>@enderror
             </div>
             <div class="field">
-                <label for="password">Password</label>
-                <input id="password" name="password" type="password" required>
+                <label for="password">New password</label>
+                <input id="password" name="password" type="password" placeholder="Leave blank to keep current">
                 @error('password')<span class="error">{{ $message }}</span>@enderror
             </div>
             <div class="field">
                 <label for="password_confirmation">Confirm password</label>
-                <input id="password_confirmation" name="password_confirmation" type="password" required>
+                <input id="password_confirmation" name="password_confirmation" type="password">
             </div>
             <div class="field">
                 <label for="subscription_status">Status</label>
                 <select id="subscription_status" name="subscription_status">
-                    <option value="active" {{ old('subscription_status') === 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ old('subscription_status', 'inactive') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    <option value="suspended" {{ old('subscription_status') === 'suspended' ? 'selected' : '' }}>Suspended</option>
+                    @foreach(['active', 'inactive', 'suspended'] as $status)
+                    <option value="{{ $status }}" {{ old('subscription_status', $user->subscription_status) === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
+                    @endforeach
                 </select>
             </div>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn-add">Create User</button>
+            <button type="submit" class="btn-add">Save Changes</button>
             <a href="{{ route('admin.users.index') }}" class="btn-reset">Cancel</a>
         </div>
     </form>

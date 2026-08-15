@@ -139,6 +139,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     
     // Movies Management
     Route::get('/movies', [AdminMovieController::class, 'index'])->name('movies.index');
+    Route::get('/movies/create', [AdminMovieController::class, 'create'])->name('movies.create');
+    Route::post('/movies', [AdminMovieController::class, 'store'])->name('movies.store');
     Route::get('/movies/{movie}/edit', [AdminMovieController::class, 'edit'])->name('movies.edit');
     Route::put('/movies/{movie}', [AdminMovieController::class, 'update'])->name('movies.update');
     

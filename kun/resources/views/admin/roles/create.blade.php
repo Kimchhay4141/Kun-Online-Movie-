@@ -1,122 +1,53 @@
 @extends('layouts.admin')
 
-@section('title', 'Create Role')
+@section('title', 'Add Role - Admin')
 
 @section('content')
-<div class="container-fluid px-4">
-    <div class="mb-4">
-        <div class="d-flex align-items-center">
-            <a href="{{ route('admin.roles.index') }}" class="btn btn-link text-decoration-none ps-0">
-                <i class="fas fa-arrow-left me-2"></i>Back to Roles
-            </a>
-        </div>
-        <h1 class="h3 mb-0 mt-2">Create Role</h1>
-    </div>
+<div class="user-form-page">
+    <a href="{{ route('admin.roles.index') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Roles</a>
+    <h1 class="page-title"><i class="fas fa-user-plus"></i> Add Role</h1>
+    <p class="page-subtitle">Name the role and choose its permissions</p>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <form action="{{ route('admin.roles.store') }}" method="POST">
-                        @csrf
-
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Role Name <span class="text-danger">*</span></label>
-                            <input type="text" 
-                                   class="form-control @error('name') is-invalid @enderror" 
-                                   id="name" 
-                                   name="name" 
-                                   value="{{ old('name') }}"
-                                   placeholder="Enter role name"
-                                   required>
-                            @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" 
-                                      id="description" 
-                                      name="description" 
-                                      rows="3"
-                                      placeholder="Enter role description">{{ old('description') }}</textarea>
-                            @error('description')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label d-block mb-3">Assign Permissions</label>
-                            
-                            @foreach($permissions as $group => $groupPermissions)
-                            <div class="permission-group mb-4">
-                                <h6 class="text-primary mb-3">
-                                    <i class="fas fa-folder me-2"></i>{{ $group }}
-                                </h6>
-                                <div class="row">
-                                    @foreach($groupPermissions as $permission)
-                                    <div class="col-md-6 mb-2">
-                                        <div class="form-check">
-                                            <input class="form-check-input" 
-                                                   type="checkbox" 
-                                                   name="permissions[]" 
-                                                   value="{{ $permission->id }}" 
-                                                   id="permission-{{ $permission->id }}"
-                                                   {{ in_array($permission->id, old('permissions', [])) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="permission-{{ $permission->id }}">
-                                                <strong>{{ $permission->name }}</strong>
-                                                <br>
-                                                <small class="text-muted">{{ $permission->description }}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                            <hr>
-                            @endforeach
-
-                            @error('permissions')
-                            <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Save Role
-                            </button>
-                            <a href="{{ route('admin.roles.index') }}" class="btn btn-secondary">
-                                Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
+    <form action="{{ route('admin.roles.store') }}" method="POST" class="user-form">
+        @csrf
+        <div class="form-grid">
+            <div class="field">
+                <label for="name">Role name</label>
+                <input id="name" name="name" type="text" value="{{ old('name') }}" required>
+                @error('name')<span class="error">{{ $message }}</span>@enderror
+            </div>
+            <div class="field full">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3">{{ old('description') }}</textarea>
+                @error('description')<span class="error">{{ $message }}</span>@enderror
             </div>
         </div>
-    </div>
+
+        <h3 class="section-label">Permissions</h3>
+        @forelse($permissions as $group => $groupPermissions)
+        <div class="perm-group">
+            <h4>{{ $group ?: 'General' }}</h4>
+            <div class="perm-grid">
+                @foreach($groupPermissions as $permission)
+                <label class="check">
+                    <input type="checkbox" name="permissions[]" value="{{ $permission->id }}" {{ in_array($permission->id, old('permissions', [])) ? 'checked' : '' }}>
+                    <span>
+                        <strong>{{ $permission->name }}</strong>
+                        <small>{{ $permission->slug }}</small>
+                    </span>
+                </label>
+                @endforeach
+            </div>
+        </div>
+        @empty
+        <p class="muted">No permissions exist yet. Create permissions first.</p>
+        @endforelse
+
+        <div class="form-actions">
+            <button type="submit" class="btn-add">Create Role</button>
+            <a href="{{ route('admin.roles.index') }}" class="btn-reset">Cancel</a>
+        </div>
+    </form>
 </div>
-
-<style>
-.permission-group {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border-left: 4px solid #0d6efd;
-}
-
-.form-check {
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    transition: background-color 0.2s;
-}
-
-.form-check:hover {
-    background-color: #e9ecef;
-}
-
-.form-check-input:checked ~ .form-check-label {
-    color: #0d6efd;
-}
-</style>
+@include('admin.partials.rbac-form-styles')
 @endsection
