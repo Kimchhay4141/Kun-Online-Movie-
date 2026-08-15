@@ -1,732 +1,496 @@
-# 🔐 RBAC System Documentation - Kun Movie Platform
+# 🔐 RBAC System Documentation
 
-## Table of Contents
-1. [Overview](#overview)
-2. [System Architecture](#system-architecture)
+## Role-Based Access Control for Online Movie Platform
+
+This document describes the complete RBAC (Role-Based Access Control) system implementation for your online movie streaming platform.
+
+---
+
+## 📋 Table of Contents
+
+1. [System Overview](#system-overview)
+2. [Database Structure](#database-structure)
 3. [Roles & Permissions](#roles--permissions)
 4. [Usage Guide](#usage-guide)
-5. [Middleware Usage](#middleware-usage)
-6. [Policy Usage](#policy-usage)
-7. [Helper Functions](#helper-functions)
-8. [Blade Directives](#blade-directives)
-9. [Database Seeding](#database-seeding)
-10. [Testing Credentials](#testing-credentials)
-11. [Best Practices](#best-practices)
+5. [API Reference](#api-reference)
+6. [Admin Panel Features](#admin-panel-features)
 
 ---
 
-## Overview
+## System Overview
 
-The Kun Movie Platform implements a comprehensive Role-Based Access Control (RBAC) system that provides:
+The RBAC system provides fine-grained access control for your movie streaming platform with:
 
-- **5 predefined roles** with hierarchical permissions
-- **40+ granular permissions** organized by resource type
-- **Middleware** for route protection
-- **Policy classes** for model-level authorization
-- **Helper functions** for quick access checks
-- **Blade directives** for view-level authorization
+✅ **5 Pre-configured Roles**
+- Admin (35 permissions)
+- Content Manager (12 permissions)
+- Moderator (9 permissions)
+- User (1 permission)
+- Premium User (1 permission)
+
+✅ **35 Permissions** across 11 modules:
+- Dashboard, Movies, Genres, Users, Roles, Permissions
+- Payments, Moderation, Analytics, Settings
+
+✅ **Features**:
+- Create/Edit/Delete Users with role assignment
+- Create/Edit/Delete Roles with permission assignment
+- Manage Permissions and group them by modules
+- Policy-based authorization
+- Middleware protection
 
 ---
 
-## System Architecture
+## Database Structure
 
-### Database Tables
+### Tables
 
+#### `roles`
+```sql
+- id (primary key)
+- name (string, unique)
+- slug (string, unique)
+- description (text, nullable)
+- created_at, updated_at
 ```
-users
-├── roles (many-to-many via role_user)
-│   └── permissions (many-to-many via permission_role)
-└── Direct relationship to check permissions through roles
+
+#### `permissions`
+```sql
+- id (primary key)
+- name (string)
+- slug (string, unique)
+- description (text, nullable)
+- group (string) -- Module grouping
+- created_at, updated_at
 ```
 
-### Key Components
+#### `role_user` (pivot table)
+```sql
+- role_id (foreign key)
+- user_id (foreign key)
+- created_at, updated_at
+```
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| User Model | `app/Models/User.php` | RBAC relationships & helper methods |
-| Role Model | `app/Models/Role.php` | Role management |
-| Permission Model | `app/Models/Permission.php` | Permission management |
-| Middleware | `app/Http/Middleware/` | Route protection |
-| Policies | `app/Policies/` | Model authorization |
-| Seeders | `database/seeders/` | Initial data setup |
-| Helper Functions | `app/helpers.php` | Global RBAC helpers |
+#### `permission_role` (pivot table)
+```sql
+- permission_id (foreign key)
+- role_id (foreign key)
+- created_at, updated_at
+```
 
 ---
 
 ## Roles & Permissions
 
-### Available Roles
+### 1. Admin Role
+**Full system access** - Can perform all operations
 
-| Role | Slug | Description | Access Level |
-|------|------|-------------|--------------|
-| **Admin** | `admin` | Full system access | All permissions |
-| **Moderator** | `moderator` | Content & user moderation | Movies, Genres, Users (limited), Analytics |
-| **Content Manager** | `content-manager` | Movie & genre management | Movies, Genres, Analytics (view) |
-| **Support** | `support` | Customer support | View users, payments, subscriptions |
-| **User** | `user` | Standard user | View movies & genres |
+**Permissions (35)**:
+- All Dashboard access
+- Full Movie management (read, create, update, delete, publish, videos)
+- Full Genre management (read, create, update, delete)
+- Full User management (read, create, update, delete, suspend, assign-roles)
+- Full Role management (read, create, update, delete)
+- Full Permission management (read, create, update, delete)
+- Payment management (read, refund, manage subscriptions)
+- Content moderation (reviews, comments)
+- Analytics & Reports access
+- Settings management
 
-### Permission Groups
+### 2. Content Manager Role
+**Manages movies and genres**
 
-#### 🎬 Movies (`movies.*`)
-- `movies.view` - View published movies
-- `movies.view-all` - View all movies including drafts
-- `movies.create` - Create new movies
-- `movies.edit` - Edit existing movies
-- `movies.delete` - Delete movies
-- `movies.publish` - Publish/unpublish movies
-- `movies.manage-videos` - Upload & manage video files
+**Permissions (12)**:
+- Access Admin Dashboard
+- Full Movie management (read, create, update, delete, publish, videos)
+- Full Genre management (read, create, update, delete)
+- View Analytics
 
-#### 🎭 Genres (`genres.*`)
-- `genres.view` - View all genres
-- `genres.create` - Create new genres
-- `genres.edit` - Edit existing genres
-- `genres.delete` - Delete genres
+### 3. Moderator Role
+**Moderates content and manages users**
 
-#### 👥 Users (`users.*`)
-- `users.view` - View user list & profiles
-- `users.create` - Create new users
-- `users.edit` - Edit user information
-- `users.delete` - Delete users
-- `users.manage-roles` - Assign/remove user roles
-- `users.ban` - Ban/unban users
+**Permissions (9)**:
+- Access Moderator Dashboard
+- View & Update Movies
+- View Genres
+- View Users & Suspend Users
+- Moderate Reviews & Comments
+- View Analytics
 
-#### 💳 Payments (`payments.*`)
-- `payments.view` - View payment transactions
-- `payments.refund` - Process refunds
-- `payments.manage-subscriptions` - Manage subscriptions
-- `payments.view-reports` - View financial reports
+### 4. User Role
+**Basic user access**
 
-#### 🔑 Roles (`roles.*`)
-- `roles.view` - View all roles
-- `roles.create` - Create new roles
-- `roles.edit` - Edit existing roles
-- `roles.delete` - Delete roles
-- `roles.manage-permissions` - Assign permissions to roles
+**Permissions (1)**:
+- Access User Dashboard
 
-#### 📊 Analytics (`analytics.*`)
-- `analytics.view` - View analytics dashboard
-- `analytics.export` - Export reports & data
+### 5. Premium User Role
+**Premium subscriber access**
 
-#### ⚙️ Settings (`settings.*`)
-- `settings.view` - View system settings
-- `settings.edit` - Modify system settings
+**Permissions (1)**:
+- Access User Dashboard
 
 ---
 
 ## Usage Guide
 
-### Check User Roles
+### Seeding Initial Data
+
+Run the seeder to create all roles and permissions:
+
+```bash
+php artisan db:seed --class=RolePermissionSeeder
+```
+
+### Creating a User with Role
 
 ```php
-// In controller or model
+use App\Models\User;
+use App\Models\Role;
+
+$user = User::create([
+    'name' => 'John Doe',
+    'email' => 'john@example.com',
+    'password' => Hash::make('password'),
+]);
+
+// Assign role
+$adminRole = Role::findBySlug('admin');
+$user->assignRole($adminRole);
+```
+
+### Checking Permissions
+
+```php
+// Check if user has specific role
 if ($user->hasRole('admin')) {
     // User is admin
 }
 
-// Check multiple roles (OR logic)
-if ($user->hasRole(['admin', 'moderator'])) {
-    // User has at least one of these roles
-}
-
-// Check if user is specifically admin
-if ($user->isAdmin()) {
-    // User is admin
-}
-```
-
-### Check User Permissions
-
-```php
-// Check single permission
-if ($user->hasPermission('movies.create')) {
+// Check if user has specific permission
+if ($user->hasPermission('movie.create')) {
     // User can create movies
 }
 
-// Check multiple permissions (OR logic)
-if ($user->hasAnyPermission(['movies.edit', 'movies.delete'])) {
-    // User has at least one of these permissions
+// Check multiple roles
+if ($user->hasAnyRole(['admin', 'moderator'])) {
+    // User is either admin or moderator
 }
 
-// Check all permissions (AND logic)
-if ($user->hasAllPermissions(['movies.edit', 'movies.publish'])) {
+// Check all permissions
+if ($user->hasAllPermissions(['movie.create', 'movie.update'])) {
     // User has both permissions
 }
 ```
 
-### Assign Roles to Users
+### Using in Controllers
 
 ```php
-// Assign single role
-$user->assignRole('moderator');
+namespace App\Http\Controllers\Admin;
 
-// Assign multiple roles
-$user->assignRole(['moderator', 'content-manager']);
+use App\Models\Movie;
 
-// Sync roles (removes existing, adds new)
-$user->syncRoles(['admin']);
-
-// Remove role
-$user->removeRole('moderator');
-```
-
-### Manage Role Permissions
-
-```php
-$role = Role::where('slug', 'moderator')->first();
-
-// Assign permission
-$role->assignPermission('movies.create');
-
-// Sync permissions
-$permissions = Permission::whereIn('slug', [
-    'movies.view-all',
-    'movies.create',
-    'movies.edit'
-])->pluck('id')->toArray();
-
-$role->syncPermissions($permissions);
-```
-
----
-
-## Middleware Usage
-
-### Available Middleware
-
-| Alias | Class | Usage |
-|-------|-------|-------|
-| `admin` | `AdminMiddleware` | Requires admin role |
-| `role` | `RoleMiddleware` | Requires specific role(s) |
-| `permission` | `PermissionMiddleware` | Requires specific permission |
-
-### Protect Routes
-
-```php
-// routes/web.php
-
-// Require admin role
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index']);
-});
-
-// Require specific role
-Route::middleware(['auth', 'role:moderator'])->group(function () {
-    Route::resource('/admin/movies', MovieController::class);
-});
-
-// Require multiple roles (OR logic)
-Route::middleware(['auth', 'role:admin,moderator'])->group(function () {
-    Route::get('/admin/users', [UserController::class, 'index']);
-});
-
-// Require specific permission
-Route::middleware(['auth', 'permission:movies.create'])->group(function () {
-    Route::post('/admin/movies', [MovieController::class, 'store']);
-});
-
-// Combine multiple middleware
-Route::middleware(['auth', 'permission:payments.view'])->group(function () {
-    Route::get('/admin/payments', [PaymentController::class, 'index']);
-});
-```
-
-### Apply Middleware to Controllers
-
-```php
 class MovieController extends Controller
 {
-    public function __construct()
+    public function create()
     {
-        // Apply to all methods
-        $this->middleware('permission:movies.view-all');
+        // Check authorization using policy
+        $this->authorize('create', Movie::class);
         
-        // Apply to specific methods
-        $this->middleware('permission:movies.create')->only(['create', 'store']);
-        $this->middleware('permission:movies.edit')->only(['edit', 'update']);
-        $this->middleware('permission:movies.delete')->only(['destroy']);
-    }
-}
-```
-
----
-
-## Policy Usage
-
-### Available Policies
-
-| Model | Policy | Methods |
-|-------|--------|---------|
-| `Movie` | `MoviePolicy` | viewAny, view, create, update, delete, publish, manageVideos |
-| `Genre` | `GenrePolicy` | viewAny, view, create, update, delete |
-| `User` | `UserPolicy` | viewAny, view, create, update, delete, manageRoles, ban |
-| `Payment` | `PaymentPolicy` | viewAny, view, refund, manageSubscriptions, viewReports |
-
-### Use Policies in Controllers
-
-```php
-class MovieController extends Controller
-{
-    public function index()
-    {
-        // Check policy
-        $this->authorize('viewAny', Movie::class);
-        
-        $movies = Movie::all();
-        return view('movies.index', compact('movies'));
+        return view('admin.movies.create');
     }
     
-    public function show(Movie $movie)
+    public function store(Request $request)
     {
-        // Check policy on specific model
-        $this->authorize('view', $movie);
+        $this->authorize('create', Movie::class);
         
-        return view('movies.show', compact('movie'));
-    }
-    
-    public function update(Request $request, Movie $movie)
-    {
-        $this->authorize('update', $movie);
-        
-        $movie->update($request->validated());
-        return redirect()->back();
-    }
-    
-    public function destroy(Movie $movie)
-    {
-        $this->authorize('delete', $movie);
-        
-        $movie->delete();
-        return redirect()->route('movies.index');
+        // Create movie logic
     }
 }
 ```
 
-### Manual Policy Checks
-
-```php
-// Check if user can perform action
-if (auth()->user()->can('update', $movie)) {
-    // User can update this movie
-}
-
-// Check if user cannot perform action
-if (auth()->user()->cannot('delete', $movie)) {
-    abort(403);
-}
-
-// Using Gate facade
-use Illuminate\Support\Facades\Gate;
-
-if (Gate::allows('update', $movie)) {
-    // User can update
-}
-
-if (Gate::denies('delete', $movie)) {
-    // User cannot delete
-}
-```
-
----
-
-## Helper Functions
-
-Global helper functions are available throughout the application:
-
-```php
-// Get current user
-$user = current_user();
-
-// Check role
-if (user_has_role('admin')) {
-    // User is admin
-}
-
-// Check permission
-if (user_has_permission('movies.create')) {
-    // User can create movies
-}
-
-// Check if admin
-if (user_is_admin()) {
-    // User is admin
-}
-
-// Check ability (policy)
-if (user_can('update', $movie)) {
-    // User can update movie
-}
-
-// Negative check
-if (user_cannot('delete', $movie)) {
-    // User cannot delete movie
-}
-
-// Abort if cannot (throws 403)
-abort_unless_can('update', $movie);
-abort_unless_has_role('admin');
-abort_unless_has_permission('movies.create');
-```
-
----
-
-## Blade Directives
-
-### Laravel's Built-in Authorization Directives
+### Using in Blade Templates
 
 ```blade
-{{-- Check ability (policy) --}}
-@can('update', $movie)
-    <a href="{{ route('movies.edit', $movie) }}">Edit Movie</a>
-@endcan
-
-@cannot('delete', $movie)
-    <p>You cannot delete this movie</p>
-@endcannot
-
-{{-- Check class-level ability --}}
 @can('create', App\Models\Movie::class)
-    <a href="{{ route('movies.create') }}">Create Movie</a>
+    <a href="{{ route('admin.movies.create') }}" class="btn btn-primary">
+        Create Movie
+    </a>
 @endcan
 
-{{-- Multiple conditions --}}
-@canany(['update', 'delete'], $movie)
-    <div class="admin-actions">
-        @can('update', $movie)
-            <button>Edit</button>
-        @endcan
-        
-        @can('delete', $movie)
-            <button>Delete</button>
-        @endcan
-    </div>
-@endcanany
+@if(auth()->user()->hasRole('admin'))
+    <!-- Admin only content -->
+@endif
+
+@if(auth()->user()->hasPermission('movie.delete'))
+    <button class="btn btn-danger">Delete</button>
+@endif
 ```
 
-### Using Helper Functions in Blade
+### Using Middleware
 
-```blade
-{{-- Check role --}}
-@if(user_has_role('admin'))
-    <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
-@endif
+```php
+// In routes/web.php
 
-{{-- Check permission --}}
-@if(user_has_permission('movies.create'))
-    <a href="{{ route('movies.create') }}">New Movie</a>
-@endif
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('admin/movies', MovieController::class);
+});
 
-{{-- Check if admin --}}
-@if(user_is_admin())
-    <div class="admin-toolbar">...</div>
-@endif
-
-{{-- Authenticated user check --}}
-@auth
-    @if(user_can('update', $movie))
-        <button>Edit</button>
-    @endif
-@endauth
+Route::middleware(['auth', 'permission:movie.create'])->group(function () {
+    Route::post('admin/movies', [MovieController::class, 'store']);
+});
 ```
 
 ---
 
-## Database Seeding
+## API Reference
 
-### Run All Seeders
+### User Model Methods
+
+```php
+// Role Methods
+$user->hasRole('admin');                    // Check single role
+$user->hasAnyRole(['admin', 'moderator']); // Check multiple roles
+$user->hasAllRoles(['admin', 'manager']);  // Check all roles
+$user->isAdmin();                          // Quick admin check
+$user->isModerator();                      // Quick moderator check
+$user->assignRole('admin');                // Assign role
+$user->removeRole('admin');                // Remove role
+$user->syncRoles(['admin', 'moderator']);  // Sync roles
+
+// Permission Methods
+$user->hasPermission('movie.create');                    // Check permission
+$user->hasAllPermissions(['movie.create', 'movie.update']); // Check all
+$user->permissions();                                     // Get all permissions
+
+// Relationships
+$user->roles;          // Get all roles
+```
+
+### Role Model Methods
+
+```php
+// Permission Methods
+$role->hasPermission('movie.create');              // Check permission
+$role->assignPermission('movie.create');           // Assign permission
+$role->removePermission('movie.create');           // Remove permission
+$role->syncPermissions(['movie.create', 'movie.update']); // Sync permissions
+
+// Static Methods
+Role::findByName('Admin');      // Find by name
+Role::findBySlug('admin');      // Find by slug
+
+// Relationships
+$role->permissions;   // Get all permissions
+$role->users;        // Get all users
+```
+
+### Permission Model Methods
+
+```php
+// Static Methods
+Permission::findByName('Create Movie');   // Find by name
+Permission::findBySlug('movie.create');   // Find by slug
+Permission::getAllGrouped();              // Get grouped by module
+
+// Relationships
+$permission->roles;   // Get all roles
+```
+
+---
+
+## Admin Panel Features
+
+### Users Management
+
+**URL**: `/admin/users`
+
+**Features**:
+- ✅ List all users with roles
+- ✅ Create new user with role assignment
+- ✅ Edit user details and roles
+- ✅ Delete users (with protection)
+- ✅ Suspend/unsuspend users
+- ✅ Filter by role, subscription
+- ✅ Search by name, email
+
+**Screenshots Reference**: Create User form (shown in your images)
+
+### Roles Management
+
+**URL**: `/admin/roles`
+
+**Features**:
+- ✅ List all roles with permission count
+- ✅ Create new role with permission selection
+- ✅ Edit role and update permissions
+- ✅ Delete roles (with protection)
+- ✅ View role details with assigned users
+- ✅ Permission grouping by module
+
+**Screenshots Reference**: Roles table (shown in your images)
+
+### Permissions Management
+
+**URL**: `/admin/permissions`
+
+**Features**:
+- ✅ List all permissions by module
+- ✅ Create new permissions
+- ✅ Edit permission details
+- ✅ Delete permissions (with protection)
+- ✅ Filter by module
+- ✅ Search permissions
+- ✅ View which roles have each permission
+
+**Screenshots Reference**: Permissions table (shown in your images)
+
+---
+
+## Routes
+
+### User Management Routes
+```
+GET    /admin/users              - List users
+GET    /admin/users/create       - Create user form
+POST   /admin/users              - Store user
+GET    /admin/users/{id}         - View user
+GET    /admin/users/{id}/edit    - Edit user form
+PUT    /admin/users/{id}         - Update user
+DELETE /admin/users/{id}         - Delete user
+```
+
+### Role Management Routes
+```
+GET    /admin/roles              - List roles
+GET    /admin/roles/create       - Create role form
+POST   /admin/roles              - Store role
+GET    /admin/roles/{role}       - View role
+GET    /admin/roles/{role}/edit  - Edit role form
+PUT    /admin/roles/{role}       - Update role
+DELETE /admin/roles/{role}       - Delete role
+```
+
+### Permission Management Routes
+```
+GET    /admin/permissions              - List permissions
+GET    /admin/permissions/create       - Create permission form
+POST   /admin/permissions              - Store permission
+GET    /admin/permissions/{permission} - View permission
+GET    /admin/permissions/{permission}/edit - Edit permission form
+PUT    /admin/permissions/{permission} - Update permission
+DELETE /admin/permissions/{permission} - Delete permission
+```
+
+---
+
+## Security Features
+
+### 1. Policy-Based Authorization
+- All CRUD operations protected by policies
+- Automatic admin bypass for super-admins
+
+### 2. Protected System Roles
+- Cannot delete `admin` or `super-admin` roles
+- Cannot delete roles with assigned users
+- Cannot delete own user account
+
+### 3. Permission Validation
+- Cannot delete permissions assigned to roles
+- Validates permission existence before assignment
+
+### 4. Middleware Protection
+- `auth` - Requires authentication
+- `admin` - Requires admin role
+- `role:admin` - Requires specific role
+- `permission:movie.create` - Requires specific permission
+
+---
+
+## Testing
+
+### Create Admin User
 
 ```bash
-# Run migrations and seeders
-php artisan migrate:fresh --seed
-
-# Or run seeders only
-php artisan db:seed
+php artisan tinker
 ```
 
-### Run Specific Seeders
+```php
+$user = User::create([
+    'name' => 'Admin User',
+    'email' => 'admin@example.com',
+    'password' => Hash::make('password123'),
+]);
 
-```bash
-# Seed roles
-php artisan db:seed --class=RoleSeeder
-
-# Seed permissions
-php artisan db:seed --class=PermissionSeeder
-
-# Seed admin users
-php artisan db:seed --class=AdminUserSeeder
+$adminRole = Role::findBySlug('admin');
+$user->assignRole($adminRole);
 ```
 
-### Seeder Output
+### Verify Installation
 
-The seeders provide helpful console output:
-
-```
-🌱 Starting Kun Movie Platform Database Seeding...
-
-📋 Seeding RBAC System...
-✓ Roles seeded successfully!
-  - Admin: Full system access
-  - Moderator: Content moderation
-  - Content Manager: Movie management
-  - Support: Customer support
-  - User: Standard user
-
-Creating permissions...
-  → movies permissions
-  → genres permissions
-  → users permissions
-  → payments permissions
-  → roles permissions
-  → analytics permissions
-  → settings permissions
-✓ Permissions created successfully!
-
-Assigning permissions to roles...
-  ✓ Admin: All permissions assigned
-  ✓ Moderator: Content management permissions assigned
-  ✓ Content Manager: Movie & genre permissions assigned
-  ✓ Support: Customer support permissions assigned
-  ✓ User: Basic viewing permissions assigned
-
-🎉 RBAC system seeded successfully!
-
-Creating admin users...
-  ✓ Super Admin created
-    Email: admin@kun.com
-    Password: password
-  ✓ Moderator created
-    Email: moderator@kun.com
-    Password: password
-  ✓ Content Manager created
-    Email: content@kun.com
-    Password: password
-  ✓ Test User created
-    Email: user@kun.com
-    Password: password
-
-✅ Database seeding completed successfully!
-
-+------------------+-----------------------+----------+
-| Role             | Email                 | Password |
-+------------------+-----------------------+----------+
-| Admin            | admin@kun.com         | password |
-| Moderator        | moderator@kun.com     | password |
-| Content Manager  | content@kun.com       | password |
-| User             | user@kun.com          | password |
-+------------------+-----------------------+----------+
-
-⚠️  Don't forget to change default passwords in production!
-```
+1. Visit: `/admin/roles`
+2. You should see 5 roles
+3. Click on "Admin" role
+4. Should show 35 permissions
 
 ---
 
-## Testing Credentials
+## Customization
 
-After seeding, use these credentials to test different permission levels:
-
-| Role | Email | Password | Access |
-|------|-------|----------|--------|
-| **Admin** | admin@kun.com | password | Full access to everything |
-| **Moderator** | moderator@kun.com | password | Content & user management |
-| **Content Manager** | content@kun.com | password | Movie & genre management only |
-| **User** | user@kun.com | password | Basic viewing only |
-
-**⚠️ IMPORTANT:** Change these passwords in production environments!
-
----
-
-## Best Practices
-
-### 1. Use Policies for Model Authorization
-
-✅ **Good:**
-```php
-$this->authorize('update', $movie);
-```
-
-❌ **Avoid:**
-```php
-if (!$user->hasPermission('movies.edit')) {
-    abort(403);
-}
-```
-
-### 2. Use Middleware for Route Protection
-
-✅ **Good:**
-```php
-Route::middleware(['auth', 'permission:movies.create'])->group(function () {
-    Route::post('/movies', [MovieController::class, 'store']);
-});
-```
-
-❌ **Avoid:**
-```php
-public function store(Request $request)
-{
-    if (!auth()->user()->hasPermission('movies.create')) {
-        abort(403);
-    }
-    // ...
-}
-```
-
-### 3. Leverage Super Admin Gate
-
-The system automatically grants all permissions to admin users:
+### Add New Permission
 
 ```php
-// In AppServiceProvider
-Gate::before(function ($user, $ability) {
-    if ($user->isAdmin()) {
-        return true; // Admins bypass all checks
-    }
-});
+Permission::create([
+    'name' => 'Manage Comments',
+    'slug' => 'comment.manage',
+    'description' => 'Can manage user comments',
+    'group' => 'Moderation',
+]);
 ```
 
-### 4. Check Permissions, Not Roles
-
-✅ **Good:**
-```php
-if ($user->hasPermission('movies.edit')) {
-    // Edit movie
-}
-```
-
-❌ **Avoid:**
-```php
-if ($user->hasRole(['admin', 'moderator', 'content-manager'])) {
-    // Edit movie - brittle, hard to maintain
-}
-```
-
-### 5. Use Blade Directives in Views
-
-✅ **Good:**
-```blade
-@can('update', $movie)
-    <button>Edit</button>
-@endcan
-```
-
-❌ **Avoid:**
-```blade
-@if(auth()->user() && auth()->user()->hasPermission('movies.edit'))
-    <button>Edit</button>
-@endif
-```
-
-### 6. Document Custom Permissions
-
-When adding new permissions, update:
-- `PermissionSeeder.php` - Add the permission
-- Role assignments in `PermissionSeeder.php`
-- This documentation file
-
-### 7. Test Authorization Logic
+### Create Custom Role
 
 ```php
-// Feature test example
-public function test_moderator_can_edit_movies()
-{
-    $moderator = User::factory()->create();
-    $moderator->assignRole('moderator');
-    
-    $movie = Movie::factory()->create();
-    
-    $this->actingAs($moderator)
-        ->get(route('movies.edit', $movie))
-        ->assertOk();
-}
+$role = Role::create([
+    'name' => 'Editor',
+    'slug' => 'editor',
+    'description' => 'Can edit content',
+]);
 
-public function test_regular_user_cannot_edit_movies()
-{
-    $user = User::factory()->create();
-    $user->assignRole('user');
-    
-    $movie = Movie::factory()->create();
-    
-    $this->actingAs($user)
-        ->get(route('movies.edit', $movie))
-        ->assertForbidden();
-}
-```
+$permissions = Permission::whereIn('slug', [
+    'movie.read',
+    'movie.update',
+    'genre.read',
+])->pluck('id');
 
----
-
-## API Integration
-
-### JSON Responses
-
-All middleware and authorization failures return appropriate JSON responses for API requests:
-
-```json
-{
-    "message": "Access denied. You do not have the required permission.",
-    "error": "permission_denied",
-    "required_permission": "movies.create"
-}
-```
-
-### API Route Example
-
-```php
-// routes/api.php
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::middleware('permission:movies.view-all')->group(function () {
-        Route::get('/movies', [Api\MovieController::class, 'index']);
-    });
-    
-    Route::middleware('permission:movies.create')->group(function () {
-        Route::post('/movies', [Api\MovieController::class, 'store']);
-    });
-});
+$role->permissions()->sync($permissions);
 ```
 
 ---
 
 ## Troubleshooting
 
-### Permission Check Always Fails
+### Permission Denied Errors
 
-1. Check if user has role assigned:
-```php
-dd($user->roles);
-```
+1. Check if user has required role/permission
+2. Verify policy is registered in `AppServiceProvider`
+3. Clear cache: `php artisan cache:clear`
 
-2. Check if role has permission:
-```php
-$role = $user->roles->first();
-dd($role->permissions);
-```
+### Roles Not Showing
 
-3. Clear cache:
-```bash
-php artisan cache:clear
-php artisan config:clear
-```
-
-### Policy Not Working
-
-1. Verify policy is registered in `AppServiceProvider.php`
-2. Check model namespace matches
-3. Use `php artisan policy:list` to view registered policies
-
-### Middleware Not Applied
-
-1. Check middleware alias in `bootstrap/app.php`
-2. Verify route uses `auth` middleware first
-3. Check middleware order in route definition
+1. Run seeder: `php artisan db:seed --class=RolePermissionSeeder`
+2. Check database connection
+3. Verify migrations ran successfully
 
 ---
 
-## Additional Resources
+## Support
 
-- [Laravel Authorization Documentation](https://laravel.com/docs/authorization)
-- [Laravel Policies](https://laravel.com/docs/authorization#creating-policies)
-- [Laravel Gates](https://laravel.com/docs/authorization#gates)
-- [Laravel Middleware](https://laravel.com/docs/middleware)
+For issues or questions:
+1. Check this documentation
+2. Review controller and policy files
+3. Check Laravel authorization docs: https://laravel.com/docs/authorization
 
 ---
 
-**Built for Kun Movie Platform** 🎬  
-Last Updated: 2026-08-12
+**Last Updated**: August 15, 2026
+**Version**: 1.0.0

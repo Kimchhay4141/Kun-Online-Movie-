@@ -56,34 +56,34 @@
             </div>
         </div>
 
-        <!-- Total Views -->
+        <!-- Total Roles -->
         <div class="stat-card stat-info">
             <div class="stat-icon">
-                <i class="fas fa-eye"></i>
+                <i class="fas fa-user-tag"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-value" id="total-views">{{ $stats['total_views'] ?? 0 }}</h3>
-                <p class="stat-label">Total Views</p>
+                <h3 class="stat-value">{{ \App\Models\Role::count() }}</h3>
+                <p class="stat-label">Total Roles</p>
                 <div class="stat-meta">
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> 1.2K today
-                    </span>
+                    <a href="{{ route('admin.roles.index') }}" class="stat-change" style="text-decoration: none;">
+                        <i class="fas fa-arrow-right"></i> Manage Roles
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Total Revenue -->
+        <!-- Total Permissions -->
         <div class="stat-card stat-warning">
             <div class="stat-icon">
-                <i class="fas fa-dollar-sign"></i>
+                <i class="fas fa-shield-alt"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-value" id="total-revenue">${{ number_format($stats['total_revenue'] ?? 0, 2) }}</h3>
-                <p class="stat-label">Total Revenue</p>
+                <h3 class="stat-value">{{ \App\Models\Permission::count() }}</h3>
+                <p class="stat-label">Total Permissions</p>
                 <div class="stat-meta">
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> $450 today
-                    </span>
+                    <a href="{{ route('admin.permissions.index') }}" class="stat-change" style="text-decoration: none;">
+                        <i class="fas fa-arrow-right"></i> View All
+                    </a>
                 </div>
             </div>
         </div>
@@ -330,41 +330,41 @@
             </div>
             <div class="card-body">
                 <div class="quick-actions-grid">
-                    <a href="{{ route('admin.movies.create') }}" class="quick-action-btn">
+                    <a href="{{ route('admin.users.create') }}" class="quick-action-btn">
                         <div class="quick-action-icon bg-primary">
-                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-user-plus"></i>
                         </div>
-                        <span>Add New Movie</span>
+                        <span>Create User</span>
                     </a>
-                    <a href="{{ route('admin.genres.create') }}" class="quick-action-btn">
+                    <a href="{{ route('admin.roles.create') }}" class="quick-action-btn">
                         <div class="quick-action-icon bg-success">
-                            <i class="fas fa-tag"></i>
+                            <i class="fas fa-user-tag"></i>
                         </div>
-                        <span>Create Genre</span>
+                        <span>Create Role</span>
+                    </a>
+                    <a href="{{ route('admin.permissions.create') }}" class="quick-action-btn">
+                        <div class="quick-action-icon bg-info">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span>Create Permission</span>
                     </a>
                     <a href="{{ route('admin.users.index') }}" class="quick-action-btn">
-                        <div class="quick-action-icon bg-info">
+                        <div class="quick-action-icon bg-warning">
                             <i class="fas fa-users"></i>
                         </div>
                         <span>Manage Users</span>
                     </a>
-                    <a href="{{ route('admin.payments.index') }}" class="quick-action-btn">
-                        <div class="quick-action-icon bg-warning">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <span>View Payments</span>
-                    </a>
-                    <a href="{{ route('admin.stats.refresh') }}" class="quick-action-btn">
+                    <a href="{{ route('admin.roles.index') }}" class="quick-action-btn">
                         <div class="quick-action-icon bg-purple">
-                            <i class="fas fa-chart-bar"></i>
+                            <i class="fas fa-user-shield"></i>
                         </div>
-                        <span>View Reports</span>
+                        <span>Manage Roles</span>
                     </a>
-                    <a href="{{ route('admin.export') }}" class="quick-action-btn">
+                    <a href="{{ route('admin.permissions.index') }}" class="quick-action-btn">
                         <div class="quick-action-icon bg-danger">
-                            <i class="fas fa-download"></i>
+                            <i class="fas fa-lock"></i>
                         </div>
-                        <span>Export Data</span>
+                        <span>Manage Permissions</span>
                     </a>
                 </div>
             </div>

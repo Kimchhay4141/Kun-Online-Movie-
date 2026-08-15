@@ -8,10 +8,14 @@ use App\Models\Movie;
 use App\Models\Genre;
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\Role;
+use App\Models\Permission;
 use App\Policies\MoviePolicy;
 use App\Policies\GenrePolicy;
 use App\Policies\UserPolicy;
 use App\Policies\PaymentPolicy;
+use App\Policies\RolePolicy;
+use App\Policies\PermissionPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
         Genre::class => GenrePolicy::class,
         User::class => UserPolicy::class,
         Payment::class => PaymentPolicy::class,
+        Role::class => RolePolicy::class,
+        Permission::class => PermissionPolicy::class,
     ];
 
     /**

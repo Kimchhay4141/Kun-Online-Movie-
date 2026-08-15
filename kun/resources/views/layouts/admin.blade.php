@@ -934,6 +934,20 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                                <i class="fas fa-user-tag"></i>
+                                <span>Roles</span>
+                                <span class="nav-badge">{{ \App\Models\Role::count() }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.permissions.index') }}" class="nav-link {{ request()->routeIs('admin.permissions.*') ? 'active' : '' }}">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Permissions</span>
+                                <span class="nav-badge">{{ \App\Models\Permission::count() }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('admin.payments.index') }}" class="nav-link {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
                                 <i class="fas fa-credit-card"></i>
                                 <span>Payments</span>
