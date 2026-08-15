@@ -35,9 +35,9 @@ class LoginController extends Controller
 
             $user = Auth::user();
 
-            // KUN Login Flow: Check user role and redirect accordingly
-            // Check for both 'admin' and 'Admin' role names (case-insensitive)
-            if ($user->hasRole('admin') || $user->hasRole('Admin')) {
+            // KUN Login Flow: Check if user is admin using isAdmin() method
+            // This checks both 'admin' and 'Admin' role names
+            if ($user->isAdmin()) {
                 // Admin -> Redirect to Admin Dashboard
                 return redirect()->route('admin.dashboard')
                     ->with('success', 'Welcome back, Admin ' . $user->name . '!');

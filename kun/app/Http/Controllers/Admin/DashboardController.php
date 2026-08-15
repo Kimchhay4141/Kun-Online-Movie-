@@ -17,21 +17,18 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Calculate statistics
+        // Calculate statistics (with safe fallbacks)
         $stats = [
             'total_movies' => Movie::count(),
             'total_users' => User::count(),
-            'total_views' => MovieView::count(),
-            'total_revenue' => Payment::where('status', 'completed')->sum('amount'),
+            'total_views' => $this->safeCount(MovieView::class),
+            'total_revenue' => $this->safeSumPayments(),
             'active_subscriptions' => User::where('subscription_status', 'active')->count(),
             'new_users_today' => User::whereDate('created_at', today())->count(),
         ];
 
         // Get popular movies (top 10 by views)
-        $popularMovies = Movie::withCount('movieViews as view_count')
-            ->orderBy('view_count', 'desc')
-            ->take(10)
-            ->get();
+        $popularMovies = $this->getPopularMovies();
 
         // Get recent users (last 5)
         $recentUsers = User::with('roles')
@@ -39,11 +36,8 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // Get recent payments (last 5)
-        $recentPayments = Payment::with('user')
-            ->latest()
-            ->take(5)
-            ->get();
+        // Get recent payments (last 5) - optional
+        $recentPayments = $this->getRecentPayments();
 
         return view('admin.dashboard', compact(
             'stats',
@@ -54,6 +48,67 @@ class DashboardController extends Controller
     }
 
     /**
+     * Safely count records from a model (returns 0 if table doesn't exist)
+     */
+    private function safeCount($modelClass)
+    {
+        try {
+            return $modelClass::count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Safely sum payments (returns 0 if Payment table doesn't exist)
+     */
+    private function safeSumPayments()
+    {
+        try {
+            if (class_exists(Payment::class)) {
+                return Payment::where('status', 'completed')->sum('amount') ?? 0;
+            }
+        } catch (\Exception $e) {
+            // Payment table doesn't exist yet
+        }
+        return 0;
+    }
+
+    /**
+     * Get popular movies (handles missing MovieView relationship)
+     */
+    private function getPopularMovies()
+    {
+        try {
+            return Movie::withCount('movieViews as view_count')
+                ->orderBy('view_count', 'desc')
+                ->take(10)
+                ->get();
+        } catch (\Exception $e) {
+            // MovieView relationship doesn't exist, just return recent movies
+            return Movie::latest()->take(10)->get();
+        }
+    }
+
+    /**
+     * Get recent payments (returns empty collection if Payment doesn't exist)
+     */
+    private function getRecentPayments()
+    {
+        try {
+            if (class_exists(Payment::class)) {
+                return Payment::with('user')
+                    ->latest()
+                    ->take(5)
+                    ->get();
+            }
+        } catch (\Exception $e) {
+            // Payment table doesn't exist yet
+        }
+        return collect(); // Return empty collection
+    }
+
+    /**
      * Refresh stats via AJAX
      */
     public function refreshStats()
@@ -61,8 +116,8 @@ class DashboardController extends Controller
         $stats = [
             'total_movies' => Movie::count(),
             'total_users' => User::count(),
-            'total_views' => MovieView::count(),
-            'total_revenue' => Payment::where('status', 'completed')->sum('amount'),
+            'total_views' => $this->safeCount(MovieView::class),
+            'total_revenue' => $this->safeSumPayments(),
         ];
 
         return response()->json($stats);

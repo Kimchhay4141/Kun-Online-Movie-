@@ -21,8 +21,9 @@ class AdminMiddleware
                 ->with('error', 'Please login to access this page.');
         }
 
-        // Check if user has admin role
-        if (!auth()->user()->hasRole('admin')) {
+        // Check if user has admin role (case-insensitive)
+        // Use isAdmin() method which checks both 'admin' and 'Admin'
+        if (!auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access. Admin privileges required.');
         }
 
