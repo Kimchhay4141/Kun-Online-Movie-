@@ -5,392 +5,867 @@
 @section('content')
 <div class="admin-dashboard">
     <!-- Dashboard Header -->
-    <div class="dashboard-header">
-        <div>
-            <h1 class="page-title">
-                <i class="fas fa-chart-line"></i> Dashboard Overview
-            </h1>
-            <p class="page-subtitle">Welcome back, {{ auth()->user()->name }}! Here's what's happening with your platform.</p>
+    <div class="dashboard-header-section">
+        <div class="header-content">
+            <h1 class="dashboard-title">Dashboard</h1>
+            <p class="dashboard-subtitle">Welcome back, Admin! Here's what's happening with your movie platform.</p>
         </div>
-        <div class="header-actions">
-            <button class="btn-refresh" onclick="refreshStats()">
-                <i class="fas fa-sync-alt"></i> Refresh
+        <div class="date-selector">
+            <button class="btn-date-range">
+                <i class="fas fa-calendar-alt"></i>
+                <span>May 15 - Jun 15, 2025</span>
+                <i class="fas fa-chevron-down"></i>
             </button>
-            <a href="{{ route('home') }}" class="btn-secondary">
-                <i class="fas fa-home"></i> View Site
+        </div>
+    </div>
+
+    <!-- Stats Cards Grid -->
+    <div class="stats-cards-grid">
+        <!-- Movies Card -->
+        <div class="stat-card-modern purple-gradient">
+            <div class="stat-icon-wrapper purple">
+                <i class="fas fa-film"></i>
+            </div>
+            <div class="stat-content-modern">
+                <span class="stat-label-modern">Movies</span>
+                <h3 class="stat-value-modern">{{ \App\Models\Movie::count() }}</h3>
+                <div class="stat-change-modern positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+12.5% vs last 30 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Card -->
+        <div class="stat-card-modern blue-gradient">
+            <div class="stat-icon-wrapper blue">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content-modern">
+                <span class="stat-label-modern">Users</span>
+                <h3 class="stat-value-modern">{{ number_format(\App\Models\User::count()) }}</h3>
+                <div class="stat-change-modern positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+18.3% vs last 30 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roles Card -->
+        <div class="stat-card-modern orange-gradient">
+            <div class="stat-icon-wrapper orange">
+                <i class="fas fa-user-tag"></i>
+            </div>
+            <div class="stat-content-modern">
+                <span class="stat-label-modern">Roles</span>
+                <h3 class="stat-value-modern">{{ \App\Models\Role::count() }}</h3>
+                <div class="stat-change-modern positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+8% vs last 30 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permissions Card -->
+        <div class="stat-card-modern green-gradient">
+            <div class="stat-icon-wrapper green">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="stat-content-modern">
+                <span class="stat-label-modern">Permissions</span>
+                <h3 class="stat-value-modern">{{ \App\Models\Permission::count() }}</h3>
+                <div class="stat-change-modern positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+7.7% vs last 30 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscriptions Card -->
+        <div class="stat-card-modern pink-gradient">
+            <div class="stat-icon-wrapper pink">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="stat-content-modern">
+                <span class="stat-label-modern">Subscriptions</span>
+                <h3 class="stat-value-modern">{{ \App\Models\User::where('subscription_status', 'active')->count() }}</h3>
+                <div class="stat-change-modern positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+22.1% vs last 30 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Users Card -->
+        <div class="stat-card-modern teal-gradient">
+            <div class="stat-icon-wrapper teal">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="stat-content-modern">
+                <span class="stat-label-modern">New Users</span>
+                <h3 class="stat-value-modern">{{ \App\Models\User::whereDate('created_at', '>=', now()->subDays(30))->count() }}</h3>
+                <div class="stat-change-modern positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+28.9% vs last 30 days</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-section">
+        <h2 class="section-title">
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+        </h2>
+        <div class="quick-actions-grid-modern">
+            <a href="{{ route('admin.movies.create') }}" class="quick-action-card">
+                <div class="qa-icon purple">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <span>Add Movie</span>
+                <small>Add new movie</small>
+            </a>
+            <a href="{{ route('admin.users.index') }}" class="quick-action-card">
+                <div class="qa-icon blue">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span>Manage Users</span>
+                <small>View all users</small>
+            </a>
+            <a href="{{ route('admin.roles.index') }}" class="quick-action-card">
+                <div class="qa-icon orange">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <span>Manage Roles</span>
+                <small>Create & edit roles</small>
+            </a>
+            <a href="{{ route('admin.permissions.index') }}" class="quick-action-card">
+                <div class="qa-icon green">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <span>Manage Permissions</span>
+                <small>Set permissions</small>
+            </a>
+            <a href="{{ route('admin.payments.index') }}" class="quick-action-card">
+                <div class="qa-icon pink">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <span>View Payments</span>
+                <small>Payment records</small>
+            </a>
+            <a href="#" class="quick-action-card">
+                <div class="qa-icon teal">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <span>Reports</span>
+                <small>View analytics</small>
             </a>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-        <!-- Total Movies -->
-        <div class="stat-card stat-primary">
-            <div class="stat-icon">
-                <i class="fas fa-film"></i>
-            </div>
-            <div class="stat-content">
-                <h3 class="stat-value" id="total-movies">{{ $stats['total_movies'] ?? 0 }}</h3>
-                <p class="stat-label">Total Movies</p>
-                <div class="stat-meta">
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> 12 this month
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Users -->
-        <div class="stat-card stat-success">
-            <div class="stat-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="stat-content">
-                <h3 class="stat-value" id="total-users">{{ $stats['total_users'] ?? 0 }}</h3>
-                <p class="stat-label">Total Users</p>
-                <div class="stat-meta">
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> 24% growth
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Roles -->
-        <div class="stat-card stat-info">
-            <div class="stat-icon">
-                <i class="fas fa-user-tag"></i>
-            </div>
-            <div class="stat-content">
-                <h3 class="stat-value">{{ \App\Models\Role::count() }}</h3>
-                <p class="stat-label">Total Roles</p>
-                <div class="stat-meta">
-                    <a href="{{ route('admin.roles.index') }}" class="stat-change" style="text-decoration: none;">
-                        <i class="fas fa-arrow-right"></i> Manage Roles
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Permissions -->
-        <div class="stat-card stat-warning">
-            <div class="stat-icon">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <div class="stat-content">
-                <h3 class="stat-value">{{ \App\Models\Permission::count() }}</h3>
-                <p class="stat-label">Total Permissions</p>
-                <div class="stat-meta">
-                    <a href="{{ route('admin.permissions.index') }}" class="stat-change" style="text-decoration: none;">
-                        <i class="fas fa-arrow-right"></i> View All
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Subscriptions -->
-        <div class="stat-card stat-purple">
-            <div class="stat-icon">
-                <i class="fas fa-crown"></i>
-            </div>
-            <div class="stat-content">
-                <h3 class="stat-value">{{ $stats['active_subscriptions'] ?? 0 }}</h3>
-                <p class="stat-label">Active Subscriptions</p>
-                <div class="stat-meta">
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> 18% increase
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- New Users Today -->
-        <div class="stat-card stat-danger">
-            <div class="stat-icon">
-                <i class="fas fa-user-plus"></i>
-            </div>
-            <div class="stat-content">
-                <h3 class="stat-value">{{ $stats['new_users_today'] ?? 0 }}</h3>
-                <p class="stat-label">New Users Today</p>
-                <div class="stat-meta">
-                    <span class="stat-change">
-                        <i class="fas fa-clock"></i> Last 24 hours
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="charts-row">
-        <!-- User Growth Chart -->
-        <div class="chart-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-chart-area"></i> User Growth
+    <!-- Analytics Section -->
+    <div class="analytics-row">
+        <!-- Platform Analytics Chart -->
+        <div class="analytics-card large-card">
+            <div class="card-header-modern">
+                <h3 class="card-title-modern">
+                    <i class="fas fa-chart-line"></i>
+                    Platform Analytics
                 </h3>
-                <div class="card-actions">
-                    <select class="period-select">
-                        <option>Last 7 Days</option>
-                        <option selected>Last 30 Days</option>
-                        <option>Last 3 Months</option>
-                        <option>Last Year</option>
-                    </select>
-                </div>
+                <select class="time-selector">
+                    <option>Last 30 Days</option>
+                    <option>Last 7 Days</option>
+                    <option>Last 90 Days</option>
+                    <option>Last Year</option>
+                </select>
             </div>
-            <div class="card-body">
-                <canvas id="userGrowthChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Revenue Chart -->
-        <div class="chart-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-chart-line"></i> Revenue Overview
-                </h3>
-                <div class="card-actions">
-                    <select class="period-select">
-                        <option>This Week</option>
-                        <option selected>This Month</option>
-                        <option>This Year</option>
-                    </select>
-                </div>
-            </div>
-            <div class="card-body">
-                <canvas id="revenueChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Content Row -->
-    <div class="content-row">
-        <!-- Popular Movies -->
-        <div class="content-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-fire"></i> Top 10 Popular Movies
-                </h3>
-                <a href="{{ route('admin.movies.index') }}" class="btn-link">View All</a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Movie</th>
-                                <th>Views</th>
-                                <th>Rating</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($popularMovies ?? [] as $index => $movie)
-                            <tr>
-                                <td>
-                                    <span class="rank-badge rank-{{ $index + 1 }}">{{ $index + 1 }}</span>
-                                </td>
-                                <td>
-                                    <div class="movie-info-cell">
-                                        <img src="{{ $movie->thumbnail ?? 'https://via.placeholder.com/50x75' }}" alt="{{ $movie->title }}" class="movie-thumb">
-                                        <div>
-                                            <strong>{{ $movie->title }}</strong>
-                                            <small>{{ $movie->release_year }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge badge-info">
-                                        <i class="fas fa-eye"></i> {{ number_format($movie->view_count ?? 0) }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="rating-badge">
-                                        <i class="fas fa-star"></i> {{ number_format($movie->rating ?? 0, 1) }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="{{ route('admin.movies.edit', $movie->id) }}" class="btn-icon" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{{ route('movie.show', $movie->id) }}" class="btn-icon" title="View" target="_blank">
-                                            <i class="fas fa-external-link-alt"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">No movies found</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Users -->
-        <div class="content-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-users"></i> Recent Users
-                </h3>
-                <a href="{{ route('admin.users.index') }}" class="btn-link">View All</a>
-            </div>
-            <div class="card-body">
-                <div class="user-list">
-                    @forelse($recentUsers ?? [] as $user)
-                    <div class="user-item">
-                        <div class="user-avatar">
-                            @if($user->avatar)
-                            <img src="{{ asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}">
-                            @else
-                            <div class="avatar-placeholder">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
-                            @endif
-                        </div>
-                        <div class="user-info">
-                            <h4 class="user-name">{{ $user->name }}</h4>
-                            <p class="user-email">{{ $user->email }}</p>
-                            <p class="user-meta">
-                                <span class="badge badge-{{ $user->subscription_status === 'active' ? 'success' : 'secondary' }}">
-                                    {{ ucfirst($user->subscription_plan ?? 'free') }}
-                                </span>
-                                <small class="text-muted">Joined {{ $user->created_at->diffForHumans() }}</small>
-                            </p>
-                        </div>
-                        <div class="user-actions">
-                            <a href="{{ route('admin.users.show', $user->id) }}" class="btn-icon">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </div>
+            <div class="card-body-modern">
+                <canvas id="platformChart" height="80"></canvas>
+                <div class="analytics-stats-row">
+                    <div class="analytics-stat-item">
+                        <span class="stat-label-small">Total Views</span>
+                        <h4 class="stat-value-small">48,290</h4>
+                        <span class="stat-change-small positive">+16.3%</span>
                     </div>
-                    @empty
-                    <p class="text-center text-muted">No recent users</p>
-                    @endforelse
+                    <div class="analytics-stat-item">
+                        <span class="stat-label-small">Total Watch Time</span>
+                        <h4 class="stat-value-small">2,142h</h4>
+                        <span class="stat-change-small positive">+18.7%</span>
+                    </div>
+                    <div class="analytics-stat-item">
+                        <span class="stat-label-small">Avg. Watch Time</span>
+                        <h4 class="stat-value-small">42m</h4>
+                        <span class="stat-change-small positive">+9.2%</span>
+                    </div>
+                    <div class="analytics-stat-item">
+                        <span class="stat-label-small">Bounce Rate</span>
+                        <h4 class="stat-value-small">24.6%</h4>
+                        <span class="stat-change-small negative">+3.1%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users by Role Pie Chart -->
+        <div class="analytics-card">
+            <div class="card-header-modern">
+                <h3 class="card-title-modern">
+                    <i class="fas fa-users"></i>
+                    Users by Role
+                </h3>
+            </div>
+            <div class="card-body-modern">
+                <canvas id="usersRoleChart" height="180"></canvas>
+                <div class="role-legend">
+                    @php
+                        $roleStats = \App\Models\Role::withCount('users')->get();
+                        $totalUsers = \App\Models\User::count();
+                    @endphp
+                    @foreach($roleStats as $role)
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: {{ ['#8b5cf6', '#3b82f6', '#f59e0b', '#10b981'][$loop->index % 4] }}"></span>
+                        <span class="legend-label">{{ $role->name }}</span>
+                        <span class="legend-value">{{ $role->users_count }} ({{ $totalUsers > 0 ? number_format(($role->users_count / $totalUsers) * 100, 1) : 0 }}%)</span>
+                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activity & Quick Stats -->
-    <div class="content-row">
-        <!-- Recent Payments -->
-        <div class="content-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-credit-card"></i> Recent Payments
-                </h3>
-                <a href="{{ route('admin.payments.index') }}" class="btn-link">View All</a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Plan</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentPayments ?? [] as $payment)
-                            <tr>
-                                <td>{{ $payment->user->name ?? 'N/A' }}</td>
-                                <td><span class="badge badge-info">{{ ucfirst($payment->plan ?? 'N/A') }}</span></td>
-                                <td><strong>${{ number_format($payment->amount ?? 0, 2) }}</strong></td>
-                                <td>
-                                    <span class="status-badge status-{{ strtolower($payment->status ?? 'pending') }}">
-                                        {{ ucfirst($payment->status ?? 'Pending') }}
-                                    </span>
-                                </td>
-                                <td><small>{{ $payment->created_at->format('M d, Y') }}</small></td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">No recent payments</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="content-card quick-actions-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-bolt"></i> Quick Actions
+    <!-- Bottom Row -->
+    <div class="bottom-row">
+        <!-- Recent Activity -->
+        <div class="activity-card">
+            <div class="card-header-modern">
+                <h3 class="card-title-modern">
+                    <i class="fas fa-clock"></i>
+                    Recent Activity
                 </h3>
             </div>
-            <div class="card-body">
-                <div class="quick-actions-grid">
-                    <a href="{{ route('admin.users.create') }}" class="quick-action-btn">
-                        <div class="quick-action-icon bg-primary">
+            <div class="card-body-modern">
+                <div class="activity-list">
+                    @php
+                        $recentUsers = \App\Models\User::latest()->take(3)->get();
+                    @endphp
+                    @foreach($recentUsers as $user)
+                    <div class="activity-item">
+                        <div class="activity-icon user-icon">
                             <i class="fas fa-user-plus"></i>
                         </div>
-                        <span>Create User</span>
-                    </a>
-                    <a href="{{ route('admin.roles.create') }}" class="quick-action-btn">
-                        <div class="quick-action-icon bg-success">
+                        <div class="activity-content">
+                            <p class="activity-text">New user registered: <strong>{{ $user->name }}</strong></p>
+                            <span class="activity-time">{{ $user->created_at->diffForHumans() }}</span>
+                        </div>
+                    </div>
+                    @endforeach
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon movie-icon">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">New movie added: <strong>The Flash</strong></p>
+                            <span class="activity-time">15 minutes ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon role-icon">
                             <i class="fas fa-user-tag"></i>
                         </div>
-                        <span>Create Role</span>
-                    </a>
-                    <a href="{{ route('admin.permissions.create') }}" class="quick-action-btn">
-                        <div class="quick-action-icon bg-info">
+                        <div class="activity-content">
+                            <p class="activity-text">Role updated: <strong>Editor</strong></p>
+                            <span class="activity-time">1 hour ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon permission-icon">
                             <i class="fas fa-shield-alt"></i>
                         </div>
-                        <span>Create Permission</span>
-                    </a>
-                    <a href="{{ route('admin.users.index') }}" class="quick-action-btn">
-                        <div class="quick-action-icon bg-warning">
-                            <i class="fas fa-users"></i>
+                        <div class="activity-content">
+                            <p class="activity-text">Permission updated: <strong>Movies Manage</strong></p>
+                            <span class="activity-time">2 hours ago</span>
                         </div>
-                        <span>Manage Users</span>
-                    </a>
-                    <a href="{{ route('admin.roles.index') }}" class="quick-action-btn">
-                        <div class="quick-action-icon bg-purple">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                        <span>Manage Roles</span>
-                    </a>
-                    <a href="{{ route('admin.permissions.index') }}" class="quick-action-btn">
-                        <div class="quick-action-icon bg-danger">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <span>Manage Permissions</span>
-                    </a>
+                    </div>
                 </div>
+                <a href="#" class="view-all-link">
+                    View all activity <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Top Movies -->
+        <div class="movies-card">
+            <div class="card-header-modern">
+                <h3 class="card-title-modern">
+                    <i class="fas fa-star"></i>
+                    Top Movies
+                </h3>
+                <div class="card-tabs">
+                    <span class="tab-item">Views</span>
+                    <span class="tab-item active">Revenue</span>
+                </div>
+            </div>
+            <div class="card-body-modern">
+                <div class="movies-list">
+                    <div class="movie-item">
+                        <img src="https://image.tmdb.org/t/p/w200/or06FN3Dka5tukK1e9sl16pB3iy.jpg" alt="Avengers: Endgame" class="movie-thumb">
+                        <div class="movie-info">
+                            <h4 class="movie-title">Avengers: Endgame</h4>
+                        </div>
+                        <div class="movie-stats">
+                            <span class="movie-views">12,540</span>
+                            <span class="movie-revenue">$2,540</span>
+                        </div>
+                    </div>
+                    <div class="movie-item">
+                        <img src="https://image.tmdb.org/t/p/w200/qJ2tW6WMUDux911r6m7haRef0WH.jpg" alt="The Dark Knight" class="movie-thumb">
+                        <div class="movie-info">
+                            <h4 class="movie-title">The Dark Knight</h4>
+                        </div>
+                        <div class="movie-stats">
+                            <span class="movie-views">9,621</span>
+                            <span class="movie-revenue">$1,870</span>
+                        </div>
+                    </div>
+                    <div class="movie-item">
+                        <img src="https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg" alt="Inception" class="movie-thumb">
+                        <div class="movie-info">
+                            <h4 class="movie-title">Inception</h4>
+                        </div>
+                        <div class="movie-stats">
+                            <span class="movie-views">7,982</span>
+                            <span class="movie-revenue">$1,320</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ route('admin.movies.index') }}" class="view-all-link">
+                    View all movies <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+/* Modern Dashboard Styles */
+.dashboard-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.btn-date-range {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-date-range:hover {
+    border-color: var(--primary-color);
+    background: var(--light-bg);
+}
+
+/* Modern Stats Cards */
+.stats-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card-modern {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+}
+
+.stat-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.stat-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.stat-icon-wrapper.purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; }
+.stat-icon-wrapper.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+.stat-icon-wrapper.orange { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+.stat-icon-wrapper.green { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+.stat-icon-wrapper.pink { background: linear-gradient(135deg, #ec4899, #db2777); color: white; }
+.stat-icon-wrapper.teal { background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; }
+
+.stat-content-modern {
+    flex: 1;
+}
+
+.stat-label-modern {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value-modern {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-change-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+}
+
+.stat-change-modern.positive {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.stat-change-modern.negative {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+/* Quick Actions Section */
+.quick-actions-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    color: var(--primary-color);
+}
+
+.quick-actions-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+.quick-action-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+    background: var(--light-bg);
+}
+
+.qa-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+}
+
+.qa-icon.purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.qa-icon.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.qa-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.qa-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+.qa-icon.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+.qa-icon.teal { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+
+.quick-action-card span {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.quick-action-card small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Analytics Row */
+.analytics-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.analytics-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.card-header-modern {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title-modern {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-title-modern i {
+    color: var(--primary-color);
+}
+
+.time-selector {
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.card-body-modern {
+    padding: 1.5rem;
+}
+
+.analytics-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.analytics-stat-item {
+    text-align: center;
+}
+
+.stat-label-small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value-small {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-change-small {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.stat-change-small.positive { color: #10b981; }
+.stat-change-small.negative { color: #ef4444; }
+
+/* Role Legend */
+.role-legend {
+    margin-top: 2rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.legend-item:last-child {
+    border-bottom: none;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-label {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.legend-value {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Bottom Row */
+.bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.activity-card,
+.movies-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: white;
+}
+
+.activity-icon.user-icon { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.activity-icon.movie-icon { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.activity-icon.role-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.activity-icon.permission-icon { background: linear-gradient(135deg, #10b981, #059669); }
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.movies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.movie-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--light-bg);
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.movie-item:hover {
+    background: var(--hover-bg);
+}
+
+.movie-thumb {
+    width: 50px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.movie-info {
+    flex: 1;
+}
+
+.movie-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.movie-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+
+.movie-views,
+.movie-revenue {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.movie-revenue {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    transition: gap 0.3s;
+}
+
+.view-all-link:hover {
+    gap: 0.75rem;
+}
+
+.card-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tab-item {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--text-secondary);
+}
+
+.tab-item.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+@media (max-width: 1200px) {
+    .analytics-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .bottom-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .analytics-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+
 @endsection
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// User Growth Chart
-const userGrowthCtx = document.getElementById('userGrowthChart');
-if (userGrowthCtx) {
-    new Chart(userGrowthCtx, {
+// Platform Analytics Chart
+const platformCtx = document.getElementById('platformChart');
+if (platformCtx) {
+    new Chart(platformCtx, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            labels: ['May 15', 'May 20', 'May 25', 'May 30', 'Jun 4', 'Jun 9', 'Jun 15'],
             datasets: [{
-                label: 'New Users',
-                data: [65, 78, 90, 110, 134, 156, 189, 220, 245, 289, 320, 356],
-                borderColor: '#46d369',
-                backgroundColor: 'rgba(70, 211, 105, 0.1)',
-                borderWidth: 3,
+                label: 'Users',
+                data: [400, 450, 480, 520, 580, 650, 700],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
                 fill: true,
-                tension: 0.4
+                borderWidth: 2
+            }, {
+                label: 'Movie Views',
+                data: [300, 380, 420, 480, 550, 620, 680],
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2
             }]
         },
         options: {
@@ -398,7 +873,12 @@ if (userGrowthCtx) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: false
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: '#b3b3b3',
+                        usePointStyle: true
+                    }
                 }
             },
             scales: {
@@ -424,30 +904,22 @@ if (userGrowthCtx) {
     });
 }
 
-// Revenue Chart
-const revenueCtx = document.getElementById('revenueChart');
-if (revenueCtx) {
-    new Chart(revenueCtx, {
-        type: 'bar',
+// Users by Role Pie Chart
+const usersRoleCtx = document.getElementById('usersRoleChart');
+if (usersRoleCtx) {
+    new Chart(usersRoleCtx, {
+        type: 'doughnut',
         data: {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            labels: ['Admin', 'Editor', 'Moderator', 'Subscriber'],
             datasets: [{
-                label: 'Revenue ($)',
-                data: [1200, 1900, 1500, 2100],
+                data: [3, 8, 15, 1219],
                 backgroundColor: [
-                    'rgba(229, 9, 20, 0.8)',
-                    'rgba(255, 165, 0, 0.8)',
-                    'rgba(70, 211, 105, 0.8)',
-                    'rgba(33, 150, 243, 0.8)'
+                    '#8b5cf6',
+                    '#3b82f6',
+                    '#f59e0b',
+                    '#10b981'
                 ],
-                borderColor: [
-                    '#e50914',
-                    '#ffa500',
-                    '#46d369',
-                    '#2196f3'
-                ],
-                borderWidth: 2,
-                borderRadius: 8
+                borderWidth: 0
             }]
         },
         options: {
@@ -456,55 +928,17 @@ if (revenueCtx) {
             plugins: {
                 legend: {
                     display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.05)'
-                    },
-                    ticks: {
-                        color: '#b3b3b3',
-                        callback: function(value) {
-                            return '$' + value;
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + ' users';
                         }
                     }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#b3b3b3'
-                    }
                 }
             }
         }
     });
-}
-
-// Refresh Stats Function
-function refreshStats() {
-    const btn = document.querySelector('.btn-refresh i');
-    btn.classList.add('fa-spin');
-    
-    fetch('{{ route('admin.stats.refresh') }}')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('total-movies').textContent = data.total_movies || 0;
-            document.getElementById('total-users').textContent = data.total_users || 0;
-            document.getElementById('total-views').textContent = data.total_views || 0;
-            document.getElementById('total-revenue').textContent = '$' + (data.total_revenue || 0).toFixed(2);
-            
-            setTimeout(() => {
-                btn.classList.remove('fa-spin');
-            }, 500);
-        })
-        .catch(error => {
-            console.error('Error refreshing stats:', error);
-            btn.classList.remove('fa-spin');
-        });
 }
 </script>
 @endsection

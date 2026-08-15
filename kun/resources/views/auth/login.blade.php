@@ -80,7 +80,7 @@
                     <input type="checkbox" name="remember">
                     <span>Remember me</span>
                 </label>
-                <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
+                {{-- <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a> --}}
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">
@@ -89,6 +89,7 @@
             </button>
         </form>
 
+        {{-- Temporarily disabled social login
         <div class="auth-divider">
             <span>or continue with</span>
         </div>
@@ -103,6 +104,7 @@
                 <span>Facebook</span>
             </a>
         </div>
+        --}}
 
         <div class="auth-footer">
             <p>Don't have an account? <a href="{{ route('register') }}">Sign up</a></p>
