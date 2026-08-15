@@ -202,7 +202,7 @@
             <!-- Pagination -->
             @if($movies->hasPages())
             <div class="pagination-wrapper">
-                {{ $movies->links() }}
+                {{ $movies->links('pagination.admin') }}
             </div>
             @endif
         </div>

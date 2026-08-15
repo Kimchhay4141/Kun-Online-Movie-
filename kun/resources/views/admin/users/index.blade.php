@@ -160,7 +160,7 @@
         </div>
         @if($users->hasPages())
         <div class="pagination-wrap">
-            {{ $users->links() }}
+            {{ $users->links('pagination.admin') }}
         </div>
         @endif
     </div>

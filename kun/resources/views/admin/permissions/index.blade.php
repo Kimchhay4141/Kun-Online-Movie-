@@ -130,7 +130,7 @@
             </table>
         </div>
         @if($permissions->hasPages())
-        <div class="pagination-wrap">{{ $permissions->links() }}</div>
+        <div class="pagination-wrap">{{ $permissions->links('pagination.admin') }}</div>
         @endif
     </div>
 </div>

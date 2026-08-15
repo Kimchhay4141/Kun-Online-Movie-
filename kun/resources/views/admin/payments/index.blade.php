@@ -194,7 +194,7 @@
             <!-- Pagination -->
             @if(isset($payments) && $payments->hasPages())
             <div class="pagination-wrapper">
-                {{ $payments->links() }}
+                {{ $payments->links('pagination.admin') }}
             </div>
             @endif
         </div>

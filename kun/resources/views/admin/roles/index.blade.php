@@ -122,7 +122,7 @@
             </table>
         </div>
         @if($roles->hasPages())
-        <div class="pagination-wrap">{{ $roles->links() }}</div>
+        <div class="pagination-wrap">{{ $roles->links('pagination.admin') }}</div>
         @endif
     </div>
 </div>
