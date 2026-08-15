@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             FavoriteSeeder::class,
             WatchlistSeeder::class,
             MovieViewSeeder::class,
+            PaymentSeeder::class,
         ]);
 
         $this->command->newLine();

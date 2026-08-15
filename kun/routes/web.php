@@ -12,6 +12,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\WatchlistController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\MovieController as AdminMovieController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -169,9 +170,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
     
     // Payments Management
-    Route::get('/payments', function() {
-        return view('admin.payments.index');
-    })->name('payments.index');
+    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/{id}', [AdminPaymentController::class, 'show'])->name('payments.show');
     
     // Statistics & Reports
     Route::get('/stats/refresh', function() {

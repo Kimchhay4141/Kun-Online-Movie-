@@ -231,6 +231,7 @@ class MovieSeeder extends Seeder
                 'slug' => Str::slug($movieData['title']),
                 'description' => $movieData['description'],
                 'release_year' => $movieData['release_year'],
+                'release_date' => $movieData['release_year'] . '-01-01',
                 'duration' => $movieData['duration'],
                 'language' => $movieData['language'],
                 'country' => $movieData['country'],
@@ -243,8 +244,8 @@ class MovieSeeder extends Seeder
                 'is_premium' => $movieData['is_premium'],
                 'status' => $movieData['status'],
                 'published_at' => now(),
-                'thumbnail' => 'https://via.placeholder.com/300x450/1a1a1a/ffffff?text=' . urlencode($movieData['title']),
-                'banner' => 'https://via.placeholder.com/1920x1080/1a1a1a/ffffff?text=' . urlencode($movieData['title']),
+                'thumbnail' => 'https://picsum.photos/seed/' . Str::slug($movieData['title']) . '/300/450',
+                'banner' => 'https://picsum.photos/seed/' . Str::slug($movieData['title']) . '/1920/1080',
             ]);
 
             // Attach genres
