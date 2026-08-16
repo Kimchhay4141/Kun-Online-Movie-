@@ -149,6 +149,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/movies/{movie}/edit', [AdminMovieController::class, 'edit'])->name('movies.edit');
     Route::put('/movies/{movie}', [AdminMovieController::class, 'update'])->name('movies.update');
     
+    // Video Management
+    Route::delete('/videos/{video}', [AdminMovieController::class, 'destroyVideo'])->name('videos.destroy');
+    
     // Genres Management
     Route::get('/genres', [App\Http\Controllers\Admin\GenreController::class, 'index'])->name('genres.index');
     Route::post('/genres', [App\Http\Controllers\Admin\GenreController::class, 'store'])->name('genres.store');

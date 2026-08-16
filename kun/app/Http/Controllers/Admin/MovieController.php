@@ -5,11 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Genre;
 use App\Models\Movie;
+use App\Models\MovieVideo;
+use App\Services\VideoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MovieController extends Controller
 {
+    protected $videoService;
+
+    public function __construct(VideoService $videoService)
+    {
+        $this->videoService = $videoService;
+    }
+
     public function index(Request $request)
     {
         $query = Movie::with('genres');
@@ -63,6 +73,18 @@ class MovieController extends Controller
     {
         $validated = $this->validatedMovie($request);
 
+        // Handle thumbnail upload
+        $thumbnailPath = null;
+        if ($request->hasFile('thumbnail')) {
+            $thumbnailPath = $request->file('thumbnail')->store('movies/thumbnails', 'public');
+        }
+
+        // Handle banner upload
+        $bannerPath = null;
+        if ($request->hasFile('banner')) {
+            $bannerPath = $request->file('banner')->store('movies/banners', 'public');
+        }
+
         $movie = Movie::create([
             'title' => $validated['title'],
             'slug' => $this->uniqueSlug($validated['title']),
@@ -72,8 +94,8 @@ class MovieController extends Controller
             'duration' => $validated['duration'] ?? null,
             'director' => $validated['director'] ?? null,
             'cast' => $validated['cast'] ?? null,
-            'thumbnail' => $validated['thumbnail'] ?? null,
-            'banner' => $validated['banner'] ?? null,
+            'thumbnail' => $thumbnailPath,
+            'banner' => $bannerPath,
             'rating' => $validated['rating'] ?? 0,
             'view_count' => $validated['view_count'] ?? 0,
             'status' => $validated['status'],
@@ -83,6 +105,9 @@ class MovieController extends Controller
         ]);
 
         $movie->genres()->sync($validated['genres'] ?? []);
+
+        // Handle video uploads
+        $this->handleVideoUploads($request, $movie);
 
         return redirect()
             ->route('admin.movies.index')
@@ -101,6 +126,28 @@ class MovieController extends Controller
     {
         $validated = $this->validatedMovie($request);
 
+        // Handle thumbnail upload
+        if ($request->hasFile('thumbnail')) {
+            // Delete old thumbnail if exists
+            if ($movie->thumbnail) {
+                Storage::disk('public')->delete($movie->thumbnail);
+            }
+            $thumbnailPath = $request->file('thumbnail')->store('movies/thumbnails', 'public');
+        } else {
+            $thumbnailPath = $movie->thumbnail;
+        }
+
+        // Handle banner upload
+        if ($request->hasFile('banner')) {
+            // Delete old banner if exists
+            if ($movie->banner) {
+                Storage::disk('public')->delete($movie->banner);
+            }
+            $bannerPath = $request->file('banner')->store('movies/banners', 'public');
+        } else {
+            $bannerPath = $movie->banner;
+        }
+
         $movie->update([
             'title' => $validated['title'],
             'slug' => $this->uniqueSlug($validated['title'], $movie->id),
@@ -110,8 +157,8 @@ class MovieController extends Controller
             'duration' => $validated['duration'] ?? null,
             'director' => $validated['director'] ?? null,
             'cast' => $validated['cast'] ?? null,
-            'thumbnail' => $validated['thumbnail'] ?? null,
-            'banner' => $validated['banner'] ?? null,
+            'thumbnail' => $thumbnailPath,
+            'banner' => $bannerPath,
             'rating' => $validated['rating'] ?? 0,
             'view_count' => $validated['view_count'] ?? 0,
             'status' => $validated['status'],
@@ -121,6 +168,9 @@ class MovieController extends Controller
         ]);
 
         $movie->genres()->sync($validated['genres'] ?? []);
+
+        // Handle video uploads
+        $this->handleVideoUploads($request, $movie);
 
         return redirect()
             ->route('admin.movies.index')
@@ -137,8 +187,8 @@ class MovieController extends Controller
             'duration' => ['nullable', 'integer', 'min:1'],
             'director' => ['nullable', 'string', 'max:255'],
             'cast' => ['nullable', 'string'],
-            'thumbnail' => ['nullable', 'url'],
-            'banner' => ['nullable', 'url'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:10240'], // 10MB max
+            'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:20480'], // 20MB max
             'rating' => ['nullable', 'numeric', 'min:0', 'max:10'],
             'view_count' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', 'in:draft,published,archived,coming_soon'],
@@ -146,6 +196,17 @@ class MovieController extends Controller
             'is_featured' => ['nullable', 'boolean'],
             'genres' => ['nullable', 'array'],
             'genres.*' => ['exists:genres,id'],
+            // Video upload validation
+            'main_video' => ['nullable', 'file', 'mimes:mp4,webm,ogg,mov,avi,mkv', 'max:2048000'], // 2GB max
+            'main_video_url' => ['nullable', 'url'],
+            'main_video_title' => ['nullable', 'string', 'max:255'],
+            'main_video_quality' => ['nullable', 'in:480p,720p,1080p,4K'],
+            'main_video_is_primary' => ['nullable', 'boolean'],
+            'trailer_video' => ['nullable', 'file', 'mimes:mp4,webm,ogg,mov,avi,mkv', 'max:2048000'],
+            'trailer_video_url' => ['nullable', 'url'],
+            'trailer_video_title' => ['nullable', 'string', 'max:255'],
+            'trailer_video_quality' => ['nullable', 'in:480p,720p,1080p,4K'],
+            'trailer_is_primary' => ['nullable', 'boolean'],
         ]);
     }
 
@@ -165,5 +226,61 @@ class MovieController extends Controller
         }
 
         return $slug;
+    }
+
+    /**
+     * Handle video uploads (both files and URLs)
+     */
+    private function handleVideoUploads(Request $request, Movie $movie)
+    {
+        // Handle main video file upload
+        if ($request->hasFile('main_video')) {
+            $this->videoService->uploadVideo(
+                $request->file('main_video'),
+                $movie->id,
+                'movie',
+                $request->boolean('main_video_is_primary', true)
+            );
+        }
+        // Handle main video URL
+        elseif ($request->filled('main_video_url')) {
+            $this->videoService->uploadVideoFromUrl(
+                $request->input('main_video_url'),
+                $movie->id,
+                'movie',
+                $request->boolean('main_video_url_is_primary', true)
+            );
+        }
+
+        // Handle trailer video file upload
+        if ($request->hasFile('trailer_video')) {
+            $this->videoService->uploadVideo(
+                $request->file('trailer_video'),
+                $movie->id,
+                'trailer',
+                $request->boolean('trailer_is_primary', false)
+            );
+        }
+        // Handle trailer video URL
+        elseif ($request->filled('trailer_video_url')) {
+            $this->videoService->uploadVideoFromUrl(
+                $request->input('trailer_video_url'),
+                $movie->id,
+                'trailer',
+                $request->boolean('trailer_video_url_is_primary', false)
+            );
+        }
+    }
+
+    /**
+     * Delete a video
+     */
+    public function destroyVideo(MovieVideo $video)
+    {
+        $this->videoService->deleteVideo($video);
+        
+        return redirect()
+            ->back()
+            ->with('success', 'Video deleted successfully!');
     }
 }
