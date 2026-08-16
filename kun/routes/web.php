@@ -72,6 +72,10 @@ Route::post('/password/email', function() {
     // Password reset email logic
 })->name('password.email');
 
+// Social Login
+Route::get('/login/{provider}', [LoginController::class, 'redirectToProvider'])->name('social.login');
+Route::get('/login/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
+
 // ==========================================
 // Protected Routes (Require Authentication)
 // ==========================================

@@ -75,11 +75,9 @@ class MovieService
             Storage::disk('public')->delete($movie->poster_path);
         }
 
-        // Delete associated videos
+        // Delete associated videos using VideoService
         foreach ($movie->videos as $video) {
-            if ($video->file_path) {
-                Storage::disk('public')->delete($video->file_path);
-            }
+            app(VideoService::class)->deleteVideo($video);
         }
 
         // Delete movie
