@@ -148,6 +148,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('/movies', [AdminMovieController::class, 'store'])->name('movies.store');
     Route::get('/movies/{movie}/edit', [AdminMovieController::class, 'edit'])->name('movies.edit');
     Route::put('/movies/{movie}', [AdminMovieController::class, 'update'])->name('movies.update');
+    Route::delete('/movies/{movie}', [AdminMovieController::class, 'destroy'])->name('movies.destroy')->middleware('permission:Delete Movie');
     
     // Video Management
     Route::delete('/videos/{video}', [AdminMovieController::class, 'destroyVideo'])->name('videos.destroy');

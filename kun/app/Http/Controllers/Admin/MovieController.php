@@ -283,4 +283,25 @@ class MovieController extends Controller
             ->back()
             ->with('success', 'Video deleted successfully!');
     }
+
+    /**
+     * Delete a movie
+     */
+    public function destroy(Movie $movie)
+    {
+        // Soft delete the movie (keeps data in database but marks as deleted)
+        $movie->delete();
+
+        // Return JSON response for AJAX requests
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Movie deleted successfully!'
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.movies.index')
+            ->with('success', 'Movie deleted successfully!');
+    }
 }

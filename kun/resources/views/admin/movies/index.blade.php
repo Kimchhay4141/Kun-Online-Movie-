@@ -105,7 +105,9 @@
                     <option value="">Bulk Actions</option>
                     <option value="publish">Publish Selected</option>
                     <option value="draft">Move to Draft</option>
+                    @if(auth()->user()->hasPermission('Delete Movie'))
                     <option value="delete">Delete Selected</option>
+                    @endif
                 </select>
                 <button class="btn-sm btn-secondary" onclick="applyBulkAction()">Apply</button>
             </div>
@@ -178,9 +180,11 @@
                                     <a href="{{ route('admin.movies.edit', $movie->id) }}" class="btn-icon" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    @if(auth()->user()->hasPermission('Delete Movie'))
                                     <button class="btn-icon btn-danger" onclick="deleteMovie({{ $movie->id }})" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -544,15 +548,21 @@ function deleteMovie(id) {
     fetch(`/admin/movies/${id}`, {
         method: 'DELETE',
         headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             window.location.reload();
         } else {
-            alert('Error deleting movie');
+            alert('Error deleting movie: ' + (data.message || 'Unknown error'));
         }
     })
     .catch(error => {

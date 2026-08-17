@@ -67,19 +67,19 @@
 
                 <div class="form-group full-width">
                     <label for="thumbnail">Thumbnail</label>
-                    <input type="file" id="thumbnail" name="thumbnail" accept="image/*">
                     @if($movie->thumbnail)
-                    <p class="current-file">Current: {{ $movie->thumbnail }}</p>
+                    <img src="{{ asset('storage/' . $movie->thumbnail) }}" alt="Current thumbnail" class="current-image-preview">
                     @endif
+                    <input type="file" id="thumbnail" name="thumbnail" accept="image/*">
                     <p class="input-hint">Upload movie thumbnail image</p>
                 </div>
 
                 <div class="form-group full-width">
                     <label for="banner">Banner</label>
-                    <input type="file" id="banner" name="banner" accept="image/*">
                     @if($movie->banner)
-                    <p class="current-file">Current: {{ $movie->banner }}</p>
+                    <img src="{{ asset('storage/' . $movie->banner) }}" alt="Current banner" class="current-image-preview">
                     @endif
+                    <input type="file" id="banner" name="banner" accept="image/*">
                     <p class="input-hint">Upload movie banner image (optional)</p>
                 </div>
 
@@ -682,9 +682,19 @@
 
 .current-file {
     font-size: 0.85rem;
-    color: #e50914;
+    color: #a3a3a3;
     margin-top: 0.25rem;
     font-weight: 500;
+}
+
+.current-image-preview {
+    max-width: 200px;
+    max-height: 150px;
+    margin-top: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #2a2a2a;
+    display: block;
+    object-fit: cover;
 }
 
 @media (max-width: 768px) { 
