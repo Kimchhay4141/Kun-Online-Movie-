@@ -867,6 +867,88 @@
         .text-center { text-align: center; }
         .text-muted { color: var(--text-muted); }
         
+        /* Flash Alerts */
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+            position: relative;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .alert span {
+            flex: 1;
+        }
+        
+        .alert-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 1.5rem;
+            font-weight: 300;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+        
+        .alert-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .alert-success {
+            background: rgba(70, 211, 105, 0.15);
+            color: var(--success-color);
+            border: 1px solid rgba(70, 211, 105, 0.3);
+        }
+        
+        .alert-error,
+        .alert-danger {
+            background: rgba(255, 68, 68, 0.15);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+        
+        .alert-warning {
+            background: rgba(255, 165, 0, 0.15);
+            color: var(--warning-color);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+        }
+        
+        .alert-info {
+            background: rgba(33, 150, 243, 0.15);
+            color: var(--info-color);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+        
         /* Responsive */
         @media (max-width: 1024px) {
             .admin-sidebar {

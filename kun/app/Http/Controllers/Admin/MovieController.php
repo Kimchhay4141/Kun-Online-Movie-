@@ -116,16 +116,11 @@ class MovieController extends Controller
         // Handle video uploads
         $this->handleVideoUploads($request, $movie);
 
-        // Redirect based on user preference or movie status
-        if ($validated['status'] === 'published') {
-            return redirect()
-                ->route('home')
-                ->with('success', 'Movie created and published successfully! It\'s now live on the homepage.');
-        }
-
+        // Always redirect to admin movies list with success message
         return redirect()
             ->route('admin.movies.index')
-            ->with('success', 'Movie created successfully!');
+            ->with('success', 'Movie "' . $movie->title . '" created successfully! ' . 
+                ($validated['status'] === 'published' ? 'It\'s now live on the homepage.' : 'Status: ' . ucfirst($validated['status'])));
     }
 
     public function edit(Movie $movie)
