@@ -948,6 +948,7 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Content Management</div>
                     <ul>
+                        @if(auth()->user()->hasPermission('View Movies'))
                         <li class="nav-item">
                             <a href="{{ route('admin.movies.index') }}" class="nav-link {{ request()->routeIs('admin.movies.*') ? 'active' : '' }}">
                                 <i class="fas fa-film"></i>
@@ -955,18 +956,22 @@
                                 <span class="nav-badge">{{ \App\Models\Movie::count() }}</span>
                             </a>
                         </li>
+                        @endif
+                        @if(auth()->user()->hasPermission('View Genres'))
                         <li class="nav-item">
                             <a href="{{ route('admin.genres.index') }}" class="nav-link {{ request()->routeIs('admin.genres.*') ? 'active' : '' }}">
                                 <i class="fas fa-tags"></i>
                                 <span>Genres</span>
                             </a>
                         </li>
+                        @endif
                     </ul>
                 </div>
-                
+
                 <div class="nav-section">
                     <div class="nav-section-title">User Management</div>
                     <ul>
+                        @if(auth()->user()->hasPermission('View Users'))
                         <li class="nav-item">
                             <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                                 <i class="fas fa-users"></i>
@@ -974,6 +979,8 @@
                                 <span class="nav-badge">{{ \App\Models\User::count() }}</span>
                             </a>
                         </li>
+                        @endif
+                        @if(auth()->user()->hasPermission('View Roles'))
                         <li class="nav-item">
                             <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
                                 <i class="fas fa-user-tag"></i>
@@ -981,6 +988,8 @@
                                 <span class="nav-badge">{{ \App\Models\Role::count() }}</span>
                             </a>
                         </li>
+                        @endif
+                        @if(auth()->user()->hasPermission('View Permissions'))
                         <li class="nav-item">
                             <a href="{{ route('admin.permissions.index') }}" class="nav-link {{ request()->routeIs('admin.permissions.*') ? 'active' : '' }}">
                                 <i class="fas fa-shield-alt"></i>
@@ -988,12 +997,15 @@
                                 <span class="nav-badge">{{ \App\Models\Permission::count() }}</span>
                             </a>
                         </li>
+                        @endif
+                        @if(auth()->user()->hasPermission('View Payments'))
                         <li class="nav-item">
                             <a href="{{ route('admin.payments.index') }}" class="nav-link {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
                                 <i class="fas fa-credit-card"></i>
                                 <span>Payments</span>
                             </a>
                         </li>
+                        @endif
                     </ul>
                 </div>
                 

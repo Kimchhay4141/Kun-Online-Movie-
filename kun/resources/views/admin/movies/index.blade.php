@@ -13,12 +13,23 @@
             <p class="page-subtitle">Manage all movies in your platform</p>
         </div>
         <div class="header-actions">
+            @if(auth()->user()->hasPermission('Create Movie'))
             <a href="{{ route('admin.movies.create') }}" class="btn-primary">
                 <i class="fas fa-plus"></i> Add New Movie
             </a>
+            @endif
             <button class="btn-secondary" onclick="toggleFilters()">
                 <i class="fas fa-filter"></i> Filters
             </button>
+            @if(request()->get('trash') !== '1')
+            <a href="{{ route('admin.movies.index', ['trash' => '1']) }}" class="btn-secondary">
+                <i class="fas fa-trash"></i> View Trash ({{ $trashedMovies ?? 0 }})
+            </a>
+            @else
+            <a href="{{ route('admin.movies.index') }}" class="btn-secondary">
+                <i class="fas fa-list"></i> View All Movies
+            </a>
+            @endif
         </div>
     </div>
 
@@ -92,6 +103,17 @@
                 <p>Coming Soon</p>
             </div>
         </div>
+        @if($trashedMovies > 0)
+        <div class="stat-card-small">
+            <div class="stat-icon bg-danger">
+                <i class="fas fa-trash"></i>
+            </div>
+            <div class="stat-info">
+                <h4>{{ $trashedMovies }}</h4>
+                <p>In Trash</p>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Movies Table -->
@@ -174,16 +196,39 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <a href="{{ route('movie.show', $movie->id) }}" class="btn-icon" title="View" target="_blank">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('admin.movies.edit', $movie->id) }}" class="btn-icon" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    @if(auth()->user()->hasPermission('Delete Movie'))
-                                    <button class="btn-icon btn-danger" onclick="deleteMovie({{ $movie->id }})" title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    @if($movie->trashed())
+                                        {{-- Actions for trashed movies --}}
+                                        <button class="btn-icon btn-success" onclick="restoreMovie({{ $movie->id }})" title="Restore">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                        <button class="btn-icon btn-danger" onclick="forceDeleteMovie({{ $movie->id }})" title="Delete Permanently">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </button>
+                                    @else
+                                        {{-- Actions for active movies --}}
+                                        <a href="{{ route('movie.show', $movie->id) }}" class="btn-icon" title="View" target="_blank">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if(auth()->user()->hasPermission('Edit Movie'))
+                                        <a href="{{ route('admin.movies.edit', $movie->id) }}" class="btn-icon" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @endif
+                                        @if(auth()->user()->hasPermission('Delete Movie'))
+                                        <div class="dropdown">
+                                            <button class="btn-icon btn-danger" onclick="toggleDropdown({{ $movie->id }})" title="Delete Options">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <div class="dropdown-menu" id="dropdown-{{ $movie->id }}">
+                                                <button class="dropdown-item" onclick="softDeleteMovie({{ $movie->id }})">
+                                                    <i class="fas fa-trash-alt"></i> Move to Trash
+                                                </button>
+                                                <button class="dropdown-item danger" onclick="forceDeleteMovie({{ $movie->id }})">
+                                                    <i class="fas fa-exclamation-triangle"></i> Delete Permanently
+                                                </button>
+                                            </div>
+                                        </div>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
@@ -458,6 +503,72 @@
     color: white !important;
 }
 
+.btn-success {
+    background: rgba(70, 211, 105, 0.15) !important;
+    color: var(--success-color) !important;
+}
+
+.btn-success:hover {
+    background: var(--success-color) !important;
+    color: white !important;
+}
+
+/* Dropdown Menu */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 180px;
+    z-index: 1000;
+    margin-top: 5px;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: var(--hover-bg);
+}
+
+.dropdown-item.danger {
+    color: var(--danger-color);
+}
+
+.dropdown-item.danger:hover {
+    background: rgba(255, 68, 68, 0.1);
+}
+
+.dropdown-item i {
+    width: 16px;
+    text-align: center;
+}
+
 .empty-state-small {
     padding: 3rem;
     text-align: center;
@@ -544,7 +655,7 @@ function deleteMovie(id) {
     if (!confirm('Are you sure you want to delete this movie?')) {
         return;
     }
-    
+
     fetch(`/admin/movies/${id}`, {
         method: 'DELETE',
         headers: {
@@ -567,6 +678,129 @@ function deleteMovie(id) {
     })
     .catch(error => {
         alert('Error deleting movie');
+        console.error(error);
+    });
+}
+
+// Toggle dropdown menu
+function toggleDropdown(id) {
+    event.stopPropagation();
+    const dropdown = document.getElementById(`dropdown-${id}`);
+    const allDropdowns = document.querySelectorAll('.dropdown-menu');
+
+    // Close all other dropdowns
+    allDropdowns.forEach(dd => {
+        if (dd.id !== `dropdown-${id}`) {
+            dd.classList.remove('show');
+        }
+    });
+
+    // Toggle current dropdown
+    dropdown.classList.toggle('show');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function() {
+    const allDropdowns = document.querySelectorAll('.dropdown-menu');
+    allDropdowns.forEach(dd => dd.classList.remove('show'));
+});
+
+// Soft delete (move to trash)
+function softDeleteMovie(id) {
+    if (!confirm('Move this movie to trash? You can restore it later.')) {
+        return;
+    }
+
+    fetch(`/admin/movies/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        alert('Error moving movie to trash');
+        console.error(error);
+    });
+}
+
+// Force delete (permanent deletion)
+function forceDeleteMovie(id) {
+    if (!confirm('PERMANENTLY DELETE this movie? This action CANNOT be undone and will remove the movie from Supabase database completely.')) {
+        return;
+    }
+
+    if (!confirm('Are you REALLY sure? This will permanently delete the movie and all associated data from Supabase.')) {
+        return;
+    }
+
+    fetch(`/admin/movies/${id}/force`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        alert('Error permanently deleting movie');
+        console.error(error);
+    });
+}
+
+// Restore movie from trash
+function restoreMovie(id) {
+    if (!confirm('Restore this movie from trash?')) {
+        return;
+    }
+
+    fetch(`/admin/movies/${id}/restore`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        alert('Error restoring movie');
         console.error(error);
     });
 }

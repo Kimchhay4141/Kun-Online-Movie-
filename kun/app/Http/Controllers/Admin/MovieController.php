@@ -24,6 +24,11 @@ class MovieController extends Controller
     {
         $query = Movie::with('genres');
 
+        // Include trashed movies if viewing trash
+        if ($request->get('trash') === '1') {
+            $query->onlyTrashed();
+        }
+
         // Search filter
         if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
@@ -45,6 +50,7 @@ class MovieController extends Controller
 
         // Stats
         $totalMovies = Movie::count();
+        $trashedMovies = Movie::onlyTrashed()->count();
         $publishedMovies = Movie::where('status', 'published')->count();
         $draftMovies = Movie::where('status', 'draft')->count();
         $comingSoonMovies = Movie::where('status', 'coming_soon')->count();
@@ -55,6 +61,7 @@ class MovieController extends Controller
         return view('admin.movies.index', compact(
             'movies',
             'totalMovies',
+            'trashedMovies',
             'publishedMovies',
             'draftMovies',
             'comingSoonMovies',
@@ -180,8 +187,8 @@ class MovieController extends Controller
     private function validatedMovie(Request $request): array
     {
         return $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'title' => ['required', 'string', 'max:255', 'min:3'],
+            'description' => ['nullable', 'string', 'min:50'],
             'release_year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'release_date' => ['nullable', 'date'],
             'duration' => ['nullable', 'integer', 'min:1'],
@@ -194,7 +201,7 @@ class MovieController extends Controller
             'status' => ['required', 'in:draft,published,archived,coming_soon'],
             'content_rating' => ['nullable', 'in:G,PG,PG-13,R,NC-17'],
             'is_featured' => ['nullable', 'boolean'],
-            'genres' => ['nullable', 'array'],
+            'genres' => ['required', 'array', 'min:1'],
             'genres.*' => ['exists:genres,id'],
             // Video upload validation
             'main_video' => ['nullable', 'file', 'mimes:mp4,webm,ogg,mov,avi,mkv', 'max:2048000'], // 2GB max
@@ -207,6 +214,22 @@ class MovieController extends Controller
             'trailer_video_title' => ['nullable', 'string', 'max:255'],
             'trailer_video_quality' => ['nullable', 'in:480p,720p,1080p,4K'],
             'trailer_is_primary' => ['nullable', 'boolean'],
+        ], [
+            'title.required' => 'Movie title is required',
+            'title.min' => 'Movie title must be at least 3 characters',
+            'description.min' => 'Description should be at least 50 characters for better user experience',
+            'release_year.min' => 'Release year must be 1900 or later',
+            'release_year.max' => 'Release year cannot be later than 2100',
+            'duration.min' => 'Duration must be at least 1 minute',
+            'rating.min' => 'Rating cannot be less than 0',
+            'rating.max' => 'Rating cannot exceed 10',
+            'status.required' => 'Please select a status for the movie',
+            'genres.required' => 'Please select at least one genre',
+            'genres.min' => 'Please select at least one genre',
+            'thumbnail.max' => 'Thumbnail file size cannot exceed 10MB',
+            'banner.max' => 'Banner file size cannot exceed 20MB',
+            'main_video.max' => 'Video file size cannot exceed 2GB',
+            'trailer_video.max' => 'Trailer file size cannot exceed 2GB',
         ]);
     }
 
@@ -285,7 +308,7 @@ class MovieController extends Controller
     }
 
     /**
-     * Delete a movie
+     * Delete a movie (soft delete)
      */
     public function destroy(Movie $movie)
     {
@@ -296,12 +319,69 @@ class MovieController extends Controller
         if (request()->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Movie deleted successfully!'
+                'message' => 'Movie moved to trash successfully!'
             ]);
         }
 
         return redirect()
             ->route('admin.movies.index')
-            ->with('success', 'Movie deleted successfully!');
+            ->with('success', 'Movie moved to trash successfully!');
+    }
+
+    /**
+     * Permanently delete a movie (hard delete)
+     */
+    public function forceDestroy($id)
+    {
+        $movie = Movie::withTrashed()->findOrFail($id);
+
+        // Delete associated files
+        if ($movie->thumbnail) {
+            Storage::disk('public')->delete($movie->thumbnail);
+        }
+        if ($movie->banner) {
+            Storage::disk('public')->delete($movie->banner);
+        }
+
+        // Delete associated videos
+        foreach ($movie->videos as $video) {
+            $this->videoService->deleteVideo($video);
+        }
+
+        // Force delete (permanently remove from database)
+        $movie->forceDelete();
+
+        // Return JSON response for AJAX requests
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Movie permanently deleted from database!'
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.movies.index')
+            ->with('success', 'Movie permanently deleted from database!');
+    }
+
+    /**
+     * Restore a soft-deleted movie
+     */
+    public function restore($id)
+    {
+        $movie = Movie::withTrashed()->findOrFail($id);
+        $movie->restore();
+
+        // Return JSON response for AJAX requests
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Movie restored successfully!'
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.movies.index')
+            ->with('success', 'Movie restored successfully!');
     }
 }

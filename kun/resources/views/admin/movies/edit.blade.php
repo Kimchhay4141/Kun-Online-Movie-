@@ -16,53 +16,69 @@
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="title">Title</label>
-                    <input type="text" id="title" name="title" value="{{ old('title', $movie->title) }}" required>
-                    @error('title')<span class="error">{{ $message }}</span>@enderror
+                    <label for="title">Title <span class="required">*</span></label>
+                    <input type="text" id="title" name="title" value="{{ old('title', $movie->title) }}" required placeholder="Enter movie title">
+                    <p class="input-hint">The main title of the movie (e.g., "The Dark Knight")</p>
+                    @error('title')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
                     <label for="release_year">Release Year</label>
-                    <input type="number" id="release_year" name="release_year" value="{{ old('release_year', $movie->release_year) }}">
+                    <input type="number" id="release_year" name="release_year" value="{{ old('release_year', $movie->release_year) }}" placeholder="2024" min="1900" max="2100">
+                    <p class="input-hint">Year when the movie was released (1900-2100)</p>
+                    @error('release_year')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
                     <label for="release_date">Release Date</label>
                     <input type="date" id="release_date" name="release_date" value="{{ old('release_date', $movie->release_date?->format('Y-m-d')) }}">
+                    <p class="input-hint">Specific release date for the movie</p>
+                    @error('release_date')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
                     <label for="duration">Duration (minutes)</label>
-                    <input type="number" id="duration" name="duration" value="{{ old('duration', $movie->duration) }}">
+                    <input type="number" id="duration" name="duration" value="{{ old('duration', $movie->duration) }}" placeholder="120" min="1">
+                    <p class="input-hint">Movie length in minutes (e.g., 120 for 2 hours)</p>
+                    @error('duration')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
                     <label for="rating">Rating (0-10)</label>
-                    <input type="number" step="0.1" id="rating" name="rating" value="{{ old('rating', $movie->rating) }}">
+                    <input type="number" step="0.1" id="rating" name="rating" value="{{ old('rating', $movie->rating) }}" placeholder="8.5" min="0" max="10">
+                    <p class="input-hint">Movie rating from 0.0 to 10.0</p>
+                    @error('rating')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
                     <label for="view_count">View Count</label>
-                    <input type="number" id="view_count" name="view_count" value="{{ old('view_count', $movie->view_count) }}">
+                    <input type="number" id="view_count" name="view_count" value="{{ old('view_count', $movie->view_count) }}" placeholder="0" min="0">
+                    <p class="input-hint">Total view count for this movie</p>
+                    @error('view_count')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="status">Status</label>
+                    <label for="status">Status <span class="required">*</span></label>
                     <select id="status" name="status" required>
+                        <option value="">Select status</option>
                         @foreach(['draft', 'published', 'archived', 'coming_soon'] as $status)
                         <option value="{{ $status }}" {{ old('status', $movie->status) === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
                         @endforeach
                     </select>
+                    <p class="input-hint">Draft: Not visible | Published: Visible to users | Coming Soon: Teaser only</p>
+                    @error('status')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
                     <label for="content_rating">Content Rating</label>
                     <select id="content_rating" name="content_rating">
-                        <option value="">None</option>
+                        <option value="">Select content rating</option>
                         @foreach(['G', 'PG', 'PG-13', 'R', 'NC-17'] as $rating)
                         <option value="{{ $rating }}" {{ old('content_rating', $movie->content_rating) === $rating ? 'selected' : '' }}>{{ $rating }}</option>
                         @endforeach
                     </select>
+                    <p class="input-hint">MPAA rating for age appropriateness</p>
+                    @error('content_rating')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group full-width">
@@ -71,7 +87,8 @@
                     <img src="{{ asset('storage/' . $movie->thumbnail) }}" alt="Current thumbnail" class="current-image-preview">
                     @endif
                     <input type="file" id="thumbnail" name="thumbnail" accept="image/*">
-                    <p class="input-hint">Upload movie thumbnail image</p>
+                    <p class="input-hint">Upload movie thumbnail image (recommended: 16:9 ratio, max 10MB)</p>
+                    @error('thumbnail')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group full-width">
@@ -80,26 +97,33 @@
                     <img src="{{ asset('storage/' . $movie->banner) }}" alt="Current banner" class="current-image-preview">
                     @endif
                     <input type="file" id="banner" name="banner" accept="image/*">
-                    <p class="input-hint">Upload movie banner image (optional)</p>
+                    <p class="input-hint">Upload movie banner image for homepage (optional, max 20MB)</p>
+                    @error('banner')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group full-width">
                     <label for="director">Director</label>
-                    <input type="text" id="director" name="director" value="{{ old('director', $movie->director) }}">
+                    <input type="text" id="director" name="director" value="{{ old('director', $movie->director) }}" placeholder="Christopher Nolan">
+                    <p class="input-hint">Name of the movie director</p>
+                    @error('director')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group full-width">
                     <label for="cast">Cast</label>
-                    <input type="text" id="cast" name="cast" value="{{ old('cast', $movie->cast) }}">
+                    <input type="text" id="cast" name="cast" value="{{ old('cast', $movie->cast) }}" placeholder="Christian Bale, Heath Ledger, Aaron Eckhart">
+                    <p class="input-hint">Main actors separated by commas</p>
+                    @error('cast')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group full-width">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="5">{{ old('description', $movie->description) }}</textarea>
+                    <textarea id="description" name="description" rows="5" placeholder="Enter a compelling description of the movie plot and storyline...">{{ old('description', $movie->description) }}</textarea>
+                    <p class="input-hint">Detailed movie description for users (minimum 50 characters recommended)</p>
+                    @error('description')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group full-width">
-                    <label>Genres</label>
+                    <label>Genres <span class="required">*</span></label>
                     <div class="genre-checkboxes">
                         @foreach($genres as $genre)
                         <label class="checkbox-label">
@@ -109,6 +133,8 @@
                         </label>
                         @endforeach
                     </div>
+                    <p class="input-hint">Select at least one genre for categorization</p>
+                    @error('genres')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
@@ -116,6 +142,7 @@
                         <input type="checkbox" name="is_featured" value="1" {{ old('is_featured', $movie->is_featured) ? 'checked' : '' }}>
                         Featured on homepage hero
                     </label>
+                    <p class="input-hint">Display this movie prominently on the homepage</p>
                 </div>
             </div>
 
@@ -350,7 +377,37 @@
 .form-actions { margin-top: 2rem; display: flex; gap: 1rem; }
 .btn { padding: 0.75rem 1.5rem; background: #e50914; color: #fff; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; }
 .btn-outline { background: transparent; border: 1px solid #fff; }
-.error { color: #ff4444; font-size: 0.9rem; }
+.error { color: #ff4444; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem; }
+.error i { font-size: 0.8rem; }
+.required { color: #e50914; margin-left: 0.25rem; }
+.input-hint { font-size: 0.8rem; color: #737373; margin-top: 0.25rem; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #e50914;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.1);
+}
+.form-group input.error-field, .form-group select.error-field, .form-group textarea.error-field {
+    border-color: #ff4444;
+    box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1);
+}
+.form-group input.success-field, .form-group select.success-field, .form-group textarea.success-field {
+    border-color: #46d369;
+    box-shadow: 0 0 0 3px rgba(70, 211, 105, 0.1);
+}
+.validation-message {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+.validation-message.show {
+    display: block;
+}
+.validation-message.error {
+    color: #ff4444;
+}
+.validation-message.success {
+    color: #46d369;
+}
 
 /* Existing Videos Section */
 .existing-videos-section {
@@ -819,6 +876,163 @@ function formatFileSize(bytes) {
 document.addEventListener('DOMContentLoaded', function() {
     setupFileUpload('main_video', 'main-video-preview');
     setupFileUpload('trailer_video', 'trailer-video-preview');
+    setupRealTimeValidation();
 });
+
+// Real-time validation
+function setupRealTimeValidation() {
+    const form = document.querySelector('.admin-form');
+    if (!form) return;
+
+    // Validate on input
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            validateField(this);
+        });
+
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+    });
+
+    // Validate on submit
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        inputs.forEach(input => {
+            if (!validateField(input)) {
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            scrollToFirstError();
+        }
+    });
+}
+
+function validateField(input) {
+    const formGroup = input.closest('.form-group');
+    if (!formGroup) return true;
+
+    let isValid = true;
+    let errorMessage = '';
+
+    // Get field name and value
+    const name = input.name;
+    const value = input.value.trim();
+    const type = input.type;
+
+    // Remove existing validation classes
+    input.classList.remove('error-field', 'success-field');
+
+    // Validation rules
+    switch(name) {
+        case 'title':
+            if (!value) {
+                isValid = false;
+                errorMessage = 'Movie title is required';
+            } else if (value.length < 3) {
+                isValid = false;
+                errorMessage = 'Title must be at least 3 characters';
+            }
+            break;
+
+        case 'release_year':
+            if (value && (value < 1900 || value > 2100)) {
+                isValid = false;
+                errorMessage = 'Year must be between 1900 and 2100';
+            }
+            break;
+
+        case 'duration':
+            if (value && value < 1) {
+                isValid = false;
+                errorMessage = 'Duration must be at least 1 minute';
+            }
+            break;
+
+        case 'rating':
+            if (value && (value < 0 || value > 10)) {
+                isValid = false;
+                errorMessage = 'Rating must be between 0 and 10';
+            }
+            break;
+
+        case 'view_count':
+            if (value && value < 0) {
+                isValid = false;
+                errorMessage = 'View count cannot be negative';
+            }
+            break;
+
+        case 'description':
+            if (value && value.length < 50) {
+                isValid = false;
+                errorMessage = 'Description should be at least 50 characters';
+            }
+            break;
+
+        case 'status':
+            if (!value) {
+                isValid = false;
+                errorMessage = 'Please select a status';
+            }
+            break;
+
+        case 'main_video_url':
+        case 'trailer_video_url':
+            if (value && !isValidUrl(value)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid URL';
+            }
+            break;
+    }
+
+    // Apply validation styling
+    if (value && isValid) {
+        input.classList.add('success-field');
+    } else if (!isValid) {
+        input.classList.add('error-field');
+    }
+
+    // Show/hide validation message
+    let validationMessage = formGroup.querySelector('.validation-message');
+    if (!validationMessage) {
+        validationMessage = document.createElement('div');
+        validationMessage.className = 'validation-message';
+        formGroup.appendChild(validationMessage);
+    }
+
+    if (!isValid && errorMessage) {
+        validationMessage.textContent = errorMessage;
+        validationMessage.className = 'validation-message error show';
+    } else if (value && isValid) {
+        validationMessage.textContent = '✓ Looks good!';
+        validationMessage.className = 'validation-message success show';
+    } else {
+        validationMessage.className = 'validation-message';
+    }
+
+    return isValid;
+}
+
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+function scrollToFirstError() {
+    const firstError = document.querySelector('.error-field');
+    if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstError.focus();
+    }
+}
 </script>
 @endsection

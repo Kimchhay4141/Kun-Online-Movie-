@@ -143,39 +143,53 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     })->name('test');
     
     // Movies Management
-    Route::get('/movies', [AdminMovieController::class, 'index'])->name('movies.index');
-    Route::get('/movies/create', [AdminMovieController::class, 'create'])->name('movies.create');
-    Route::post('/movies', [AdminMovieController::class, 'store'])->name('movies.store');
-    Route::get('/movies/{movie}/edit', [AdminMovieController::class, 'edit'])->name('movies.edit');
-    Route::put('/movies/{movie}', [AdminMovieController::class, 'update'])->name('movies.update');
+    Route::get('/movies', [AdminMovieController::class, 'index'])->name('movies.index')->middleware('permission:View Movies');
+    Route::get('/movies/create', [AdminMovieController::class, 'create'])->name('movies.create')->middleware('permission:Create Movie');
+    Route::post('/movies', [AdminMovieController::class, 'store'])->name('movies.store')->middleware('permission:Create Movie');
+    Route::get('/movies/{movie}/edit', [AdminMovieController::class, 'edit'])->name('movies.edit')->middleware('permission:Edit Movie');
+    Route::put('/movies/{movie}', [AdminMovieController::class, 'update'])->name('movies.update')->middleware('permission:Edit Movie');
     Route::delete('/movies/{movie}', [AdminMovieController::class, 'destroy'])->name('movies.destroy')->middleware('permission:Delete Movie');
-    
+    Route::delete('/movies/{movie}/force', [AdminMovieController::class, 'forceDestroy'])->name('movies.forceDestroy')->middleware('permission:Delete Movie');
+    Route::post('/movies/{id}/restore', [AdminMovieController::class, 'restore'])->name('movies.restore')->middleware('permission:Delete Movie');
+
     // Video Management
-    Route::delete('/videos/{video}', [AdminMovieController::class, 'destroyVideo'])->name('videos.destroy');
-    
+    Route::delete('/videos/{video}', [AdminMovieController::class, 'destroyVideo'])->name('videos.destroy')->middleware('permission:Manage Movie Videos');
+
     // Genres Management
-    Route::get('/genres', [App\Http\Controllers\Admin\GenreController::class, 'index'])->name('genres.index');
-    Route::post('/genres', [App\Http\Controllers\Admin\GenreController::class, 'store'])->name('genres.store');
-    Route::put('/genres/{id}', [App\Http\Controllers\Admin\GenreController::class, 'update'])->name('genres.update');
-    Route::delete('/genres/{id}', [App\Http\Controllers\Admin\GenreController::class, 'destroy'])->name('genres.destroy');
-    
+    Route::get('/genres', [App\Http\Controllers\Admin\GenreController::class, 'index'])->name('genres.index')->middleware('permission:View Genres');
+    Route::post('/genres', [App\Http\Controllers\Admin\GenreController::class, 'store'])->name('genres.store')->middleware('permission:Create Genre');
+    Route::put('/genres/{id}', [App\Http\Controllers\Admin\GenreController::class, 'update'])->name('genres.update')->middleware('permission:Edit Genre');
+    Route::delete('/genres/{id}', [App\Http\Controllers\Admin\GenreController::class, 'destroy'])->name('genres.destroy')->middleware('permission:Delete Genre');
+
     // Users Management
-    Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
-    Route::get('/users/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
-    Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
-    Route::get('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
-    Route::get('/users/{id}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{id}/suspend', [App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend');
-    Route::post('/users/{id}/assign-roles', [App\Http\Controllers\Admin\UserController::class, 'assignRoles'])->name('users.assign-roles');
+    Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index')->middleware('permission:View Users');
+    Route::get('/users/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create')->middleware('permission:Create User');
+    Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store')->middleware('permission:Create User');
+    Route::get('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show')->middleware('permission:View Users');
+    Route::get('/users/{id}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit')->middleware('permission:Edit User');
+    Route::put('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update')->middleware('permission:Edit User');
+    Route::delete('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:Delete User');
+    Route::post('/users/{id}/suspend', [App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend')->middleware('permission:Suspend User');
+    Route::post('/users/{id}/assign-roles', [App\Http\Controllers\Admin\UserController::class, 'assignRoles'])->name('users.assign-roles')->middleware('permission:Assign Roles');
     
     // Roles Management
-    Route::resource('roles', App\Http\Controllers\Admin\RoleController::class);
-    Route::post('/roles/{role}/assign-permissions', [App\Http\Controllers\Admin\RoleController::class, 'assignPermissions'])->name('roles.assign-permissions');
-    
+    Route::get('/roles', [App\Http\Controllers\Admin\RoleController::class, 'index'])->name('roles.index')->middleware('permission:View Roles');
+    Route::get('/roles/create', [App\Http\Controllers\Admin\RoleController::class, 'create'])->name('roles.create')->middleware('permission:Create Role');
+    Route::post('/roles', [App\Http\Controllers\Admin\RoleController::class, 'store'])->name('roles.store')->middleware('permission:Create Role');
+    Route::get('/roles/{role}', [App\Http\Controllers\Admin\RoleController::class, 'show'])->name('roles.show')->middleware('permission:View Roles');
+    Route::get('/roles/{role}/edit', [App\Http\Controllers\Admin\RoleController::class, 'edit'])->name('roles.edit')->middleware('permission:Edit Role');
+    Route::put('/roles/{role}', [App\Http\Controllers\Admin\RoleController::class, 'update'])->name('roles.update')->middleware('permission:Edit Role');
+    Route::delete('/roles/{role}', [App\Http\Controllers\Admin\RoleController::class, 'destroy'])->name('roles.destroy')->middleware('permission:Delete Role');
+    Route::post('/roles/{role}/assign-permissions', [App\Http\Controllers\Admin\RoleController::class, 'assignPermissions'])->name('roles.assign-permissions')->middleware('permission:Assign Roles');
+
     // Permissions Management
-    Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
+    Route::get('/permissions', [App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('permissions.index')->middleware('permission:View Permissions');
+    Route::get('/permissions/create', [App\Http\Controllers\Admin\PermissionController::class, 'create'])->name('permissions.create')->middleware('permission:Create Permission');
+    Route::post('/permissions', [App\Http\Controllers\Admin\PermissionController::class, 'store'])->name('permissions.store')->middleware('permission:Create Permission');
+    Route::get('/permissions/{permission}', [App\Http\Controllers\Admin\PermissionController::class, 'show'])->name('permissions.show')->middleware('permission:View Permissions');
+    Route::get('/permissions/{permission}/edit', [App\Http\Controllers\Admin\PermissionController::class, 'edit'])->name('permissions.edit')->middleware('permission:Edit Permission');
+    Route::put('/permissions/{permission}', [App\Http\Controllers\Admin\PermissionController::class, 'update'])->name('permissions.update')->middleware('permission:Edit Permission');
+    Route::delete('/permissions/{permission}', [App\Http\Controllers\Admin\PermissionController::class, 'destroy'])->name('permissions.destroy')->middleware('permission:Delete Permission');
     
     // Payments Management
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
