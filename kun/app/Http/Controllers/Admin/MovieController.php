@@ -181,9 +181,38 @@ class MovieController extends Controller
         // Handle video uploads
         $this->handleVideoUploads($request, $movie);
 
+        // Build detailed success message
+        $successMessage = '✅ Movie "' . $movie->title . '" updated successfully!';
+        
+        // Add what was changed
+        $changes = [];
+        if ($request->hasFile('thumbnail')) {
+            $changes[] = 'thumbnail uploaded';
+        }
+        if ($request->hasFile('banner')) {
+            $changes[] = 'banner uploaded';
+        }
+        if ($request->hasFile('main_video') || $request->filled('main_video_url')) {
+            $changes[] = 'main video added';
+        }
+        if ($request->hasFile('trailer_video') || $request->filled('trailer_video_url')) {
+            $changes[] = 'trailer added';
+        }
+        
+        if (!empty($changes)) {
+            $successMessage .= ' Changes: ' . implode(', ', $changes) . '.';
+        }
+        
+        // Add status info
+        if ($validated['status'] === 'published') {
+            $successMessage .= ' Movie is now LIVE on homepage! 🎉';
+        } else {
+            $successMessage .= ' Status: ' . ucfirst($validated['status']) . '.';
+        }
+
         return redirect()
             ->route('admin.movies.index')
-            ->with('success', 'Movie updated successfully!');
+            ->with('success', $successMessage);
     }
 
     private function validatedMovie(Request $request): array
