@@ -25,4 +25,18 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
-YOUR_SECRET_KEY_HERE
+
+# Ignore temporary documentation and test files
+*.md
+!README.md
+/test/
+/reads_delete/
+verify_*.php
+check_*.php
+migrate_*.php
+fix_*.php
+test_*.php
+*_GUIDE.md
+*_SUMMARY.md
+*_COMPLETE.md
+GET_SUPABASE_KEYS.md

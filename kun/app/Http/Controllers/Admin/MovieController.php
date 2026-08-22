@@ -7,6 +7,8 @@ use App\Models\Genre;
 use App\Models\Movie;
 use App\Models\MovieVideo;
 use App\Services\VideoServiceV2;
+use App\Services\MovieService;
+use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,10 +16,17 @@ use Illuminate\Support\Str;
 class MovieController extends Controller
 {
     protected $videoService;
+    protected $movieService;
+    protected $supabaseStorage;
 
-    public function __construct(VideoServiceV2 $videoService)
-    {
+    public function __construct(
+        VideoServiceV2 $videoService,
+        MovieService $movieService,
+        SupabaseStorageService $supabaseStorage
+    ) {
         $this->videoService = $videoService;
+        $this->movieService = $movieService;
+        $this->supabaseStorage = $supabaseStorage;
     }
 
     public function index(Request $request)
@@ -80,16 +89,22 @@ class MovieController extends Controller
     {
         $validated = $this->validatedMovie($request);
 
-        // Handle thumbnail upload
+        // Handle thumbnail upload to Supabase
         $thumbnailPath = null;
         if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('movies/thumbnails', 'public');
+            $file = $request->file('thumbnail');
+            $filename = 'posters/' . time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $result = $this->supabaseStorage->upload($file, $filename, 'posters');
+            $thumbnailPath = $result['url'];
         }
 
-        // Handle banner upload
+        // Handle banner upload to Supabase
         $bannerPath = null;
         if ($request->hasFile('banner')) {
-            $bannerPath = $request->file('banner')->store('movies/banners', 'public');
+            $file = $request->file('banner');
+            $filename = 'posters/' . time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $result = $this->supabaseStorage->upload($file, $filename, 'posters');
+            $bannerPath = $result['url'];
         }
 
         $movie = Movie::create([
@@ -135,24 +150,30 @@ class MovieController extends Controller
     {
         $validated = $this->validatedMovie($request);
 
-        // Handle thumbnail upload
+        // Handle thumbnail upload to Supabase
         if ($request->hasFile('thumbnail')) {
-            // Delete old thumbnail if exists
-            if ($movie->thumbnail) {
-                Storage::disk('public')->delete($movie->thumbnail);
+            // Delete old thumbnail from Supabase if exists
+            if ($movie->thumbnail && str_contains($movie->thumbnail, 'supabase.co')) {
+                $this->deleteFromSupabase($movie->thumbnail, 'posters');
             }
-            $thumbnailPath = $request->file('thumbnail')->store('movies/thumbnails', 'public');
+            $file = $request->file('thumbnail');
+            $filename = 'posters/' . time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $result = $this->supabaseStorage->upload($file, $filename, 'posters');
+            $thumbnailPath = $result['url'];
         } else {
             $thumbnailPath = $movie->thumbnail;
         }
 
-        // Handle banner upload
+        // Handle banner upload to Supabase
         if ($request->hasFile('banner')) {
-            // Delete old banner if exists
-            if ($movie->banner) {
-                Storage::disk('public')->delete($movie->banner);
+            // Delete old banner from Supabase if exists
+            if ($movie->banner && str_contains($movie->banner, 'supabase.co')) {
+                $this->deleteFromSupabase($movie->banner, 'posters');
             }
-            $bannerPath = $request->file('banner')->store('movies/banners', 'public');
+            $file = $request->file('banner');
+            $filename = 'posters/' . time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $result = $this->supabaseStorage->upload($file, $filename, 'posters');
+            $bannerPath = $result['url'];
         } else {
             $bannerPath = $movie->banner;
         }
@@ -366,12 +387,12 @@ class MovieController extends Controller
     {
         $movie = Movie::withTrashed()->findOrFail($id);
 
-        // Delete associated files
+        // Delete associated images from Supabase
         if ($movie->thumbnail) {
-            Storage::disk('public')->delete($movie->thumbnail);
+            $this->deleteFromSupabase($movie->thumbnail, 'posters');
         }
         if ($movie->banner) {
-            Storage::disk('public')->delete($movie->banner);
+            $this->deleteFromSupabase($movie->banner, 'posters');
         }
 
         // Delete associated videos
@@ -414,5 +435,33 @@ class MovieController extends Controller
         return redirect()
             ->route('admin.movies.index')
             ->with('success', 'Movie restored successfully!');
+    }
+
+    /**
+     * Delete file from Supabase Storage
+     */
+    private function deleteFromSupabase($url, $bucket = 'posters')
+    {
+        if (!$url || !str_contains($url, 'supabase.co')) {
+            return;
+        }
+
+        try {
+            // Extract path from URL
+            $urlParts = parse_url($url);
+            $path = $urlParts['path'] ?? '';
+            // Remove /storage/v1/object/public/{bucket}/ prefix
+            $path = preg_replace('#^/storage/v1/object/public/' . $bucket . '/#', '', $path);
+            
+            if ($path) {
+                $this->supabaseStorage->delete($path, $bucket);
+                \Log::info('File deleted from Supabase:', ['path' => $path, 'bucket' => $bucket]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete from Supabase:', [
+                'error' => $e->getMessage(),
+                'url' => $url,
+            ]);
+        }
     }
 }
