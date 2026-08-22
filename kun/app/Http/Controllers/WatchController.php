@@ -44,10 +44,10 @@ class WatchController extends Controller
         // Increment watch count
         $movieView->increment('watch_count');
 
-        // Get the primary video
+        // Get the primary video (movie type)
         $video = $movie->videos()
-            ->where('type', 'full')
-            ->where('quality', 'HD')
+            ->where('video_type', 'movie')
+            ->where('is_primary', true)
             ->first() ?? $movie->videos()->first();
 
         if (!$video) {
@@ -55,11 +55,12 @@ class WatchController extends Controller
                 ->with('error', 'Video not available for this movie.');
         }
 
-        // Get available video qualities
+        // Get available video qualities (if multiple versions exist)
         $qualities = $movie->videos()
-            ->where('type', 'full')
+            ->where('video_type', 'movie')
             ->get()
-            ->pluck('quality', 'id');
+            ->pluck('quality', 'id')
+            ->filter(); // Remove null qualities
 
         // Get next episode/movie (for series or recommendations)
         $nextMovie = $this->getNextMovie($movie);

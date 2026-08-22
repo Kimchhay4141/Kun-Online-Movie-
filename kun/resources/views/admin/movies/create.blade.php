@@ -81,16 +81,16 @@
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="thumbnail">Thumbnail</label>
+                    <label for="thumbnail">Thumbnail (Poster)</label>
                     <input type="file" id="thumbnail" name="thumbnail" accept="image/*">
-                    <p class="input-hint">Upload movie thumbnail image (recommended: 16:9 ratio, max 10MB)</p>
+                    <p class="input-hint">Upload movie poster image (recommended: 2:3 ratio, max 10MB). Will be stored in Supabase.</p>
                     @error('thumbnail')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="banner">Banner</label>
+                    <label for="banner">Banner (Background)</label>
                     <input type="file" id="banner" name="banner" accept="image/*">
-                    <p class="input-hint">Upload movie banner image for homepage (optional, max 20MB)</p>
+                    <p class="input-hint">Upload movie banner image for backgrounds (optional, recommended: 16:9 ratio, max 20MB). Will be stored in Supabase.</p>
                     @error('banner')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 

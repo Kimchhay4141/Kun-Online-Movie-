@@ -16,7 +16,7 @@ class MovieService
     {
         // Handle poster upload
         if (isset($data['poster'])) {
-            $data['poster_path'] = $this->uploadPoster($data['poster']);
+            $data['thumbnail'] = $this->uploadPoster($data['poster']);
             unset($data['poster']);
         }
 
@@ -41,11 +41,11 @@ class MovieService
     {
         // Handle poster upload
         if (isset($data['poster'])) {
-            // Delete old poster
-            if ($movie->poster_path) {
-                Storage::disk('public')->delete($movie->poster_path);
+            // Delete old poster from Supabase
+            if ($movie->thumbnail) {
+                $this->deletePoster($movie->thumbnail);
             }
-            $data['poster_path'] = $this->uploadPoster($data['poster']);
+            $data['thumbnail'] = $this->uploadPoster($data['poster']);
             unset($data['poster']);
         }
 
@@ -70,14 +70,14 @@ class MovieService
      */
     public function deleteMovie(Movie $movie)
     {
-        // Delete poster
-        if ($movie->poster_path) {
-            Storage::disk('public')->delete($movie->poster_path);
+        // Delete poster from Supabase
+        if ($movie->thumbnail) {
+            $this->deletePoster($movie->thumbnail);
         }
 
-        // Delete associated videos using VideoService
+        // Delete associated videos using VideoServiceV2
         foreach ($movie->videos as $video) {
-            app(VideoService::class)->deleteVideo($video);
+            app(VideoServiceV2::class)->deleteVideo($video);
         }
 
         // Delete movie
@@ -190,13 +190,72 @@ class MovieService
     }
 
     /**
-     * Upload poster image
+     * Upload poster image to Supabase Storage
      */
     protected function uploadPoster($file)
     {
+        // Use Supabase REST API for upload
+        $supabaseStorage = app(SupabaseStorageService::class);
+        
+        // Generate unique filename
         $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('movies/posters', $filename, 'public');
-        return $path;
+        $path = 'posters/' . $filename;
+        
+        \Log::info('Uploading poster to Supabase:', [
+            'path' => $path,
+            'size' => $file->getSize(),
+        ]);
+        
+        try {
+            // Upload to Supabase posters bucket
+            $result = $supabaseStorage->upload($file, $path, 'posters');
+            
+            \Log::info('Poster uploaded successfully:', [
+                'url' => $result['url'],
+            ]);
+            
+            return $result['url'];
+        } catch (\Exception $e) {
+            \Log::error('Failed to upload poster:', [
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Delete poster from Supabase Storage
+     */
+    protected function deletePoster($posterUrl)
+    {
+        if (!$posterUrl) {
+            return;
+        }
+
+        // Check if it's a Supabase URL
+        if (!str_contains($posterUrl, env('SUPABASE_URL'))) {
+            return;
+        }
+
+        try {
+            $supabaseStorage = app(SupabaseStorageService::class);
+            
+            // Extract path from URL
+            $urlParts = parse_url($posterUrl);
+            $path = $urlParts['path'] ?? '';
+            // Remove /storage/v1/object/public/posters/ prefix
+            $path = preg_replace('#^/storage/v1/object/public/posters/#', '', $path);
+            
+            if ($path) {
+                $supabaseStorage->delete($path, 'posters');
+                \Log::info('Poster deleted from Supabase:', ['path' => $path]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete poster:', [
+                'error' => $e->getMessage(),
+                'url' => $posterUrl,
+            ]);
+        }
     }
 
     /**

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Genre;
 use App\Models\Movie;
 use App\Models\MovieVideo;
-use App\Services\VideoService;
+use App\Services\VideoServiceV2;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -15,7 +15,7 @@ class MovieController extends Controller
 {
     protected $videoService;
 
-    public function __construct(VideoService $videoService)
+    public function __construct(VideoServiceV2 $videoService)
     {
         $this->videoService = $videoService;
     }

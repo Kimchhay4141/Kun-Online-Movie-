@@ -82,19 +82,25 @@
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="thumbnail">Thumbnail</label>
+                    <label for="thumbnail">Thumbnail (Poster)</label>
                     @if($movie->thumbnail)
-                    <img src="{{ asset('storage/' . $movie->thumbnail) }}" alt="Current thumbnail" class="current-image-preview">
+                    <div class="current-image-preview">
+                        <img src="{{ $movie->thumbnail }}" alt="Current thumbnail">
+                        <p class="image-url">Current: {{ basename($movie->thumbnail) }}</p>
+                    </div>
                     @endif
                     <input type="file" id="thumbnail" name="thumbnail" accept="image/*">
-                    <p class="input-hint">Upload movie thumbnail image (recommended: 16:9 ratio, max 10MB)</p>
+                    <p class="input-hint">Upload movie poster image (recommended: 2:3 ratio, max 10MB). Will be stored in Supabase.</p>
                     @error('thumbnail')<span class="error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="banner">Banner</label>
+                    <label for="banner">Banner (Background)</label>
                     @if($movie->banner)
-                    <img src="{{ asset('storage/' . $movie->banner) }}" alt="Current banner" class="current-image-preview">
+                    <div class="current-image-preview">
+                        <img src="{{ $movie->banner }}" alt="Current banner">
+                        <p class="image-url">Current: {{ basename($movie->banner) }}</p>
+                    </div>
                     @endif
                     <input type="file" id="banner" name="banner" accept="image/*">
                     <p class="input-hint">Upload movie banner image for homepage (optional, max 20MB)</p>
